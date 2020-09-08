@@ -7,6 +7,24 @@ RegisterFileTester.o ConditionCodes.o ConditionCodesTester.o
 	$(CC) $(CFLAGS) $< -o $@
 
 lab4: $(OBJ)
+	$(CC) $(OBJ) -o lab4
+
+lab4.o: Memory.h RegisterFile.h MemoryTester.h RegisterFileTester.h ConditionCodes.h ConditionCodesTester.h
+
+ConditionsCodes.o: Conditions.h Tools.h
+
+ConditionsCodesTester.o: ConditionCodes.h conditioncodesTester.h
+
+RegisterFileTester.o: RegisterFile.h RegisterFileTester.h
+
+RegisterFile.o: RegisterFile.h Tools.h
+
+Tools.o: Tools.h
+
+Memory.o: Memory.h Tools.h
+
+MemoryTester.o: Memory.h MemoryTester.h
+
 
 clean:
 	rm $(OBJ) lab4
