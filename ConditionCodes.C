@@ -6,6 +6,7 @@
 //cc_instance will be initialized to reference the single 
 //instance of ConditionCodes
 ConditionCodes * ConditionCodes::ccInstance = NULL;
+int codes;
 
 /**
  * ConditionCodes constructor
@@ -13,7 +14,7 @@ ConditionCodes * ConditionCodes::ccInstance = NULL;
  */
 ConditionCodes::ConditionCodes()
 {
-
+    codes = 0;
 }
 
 /**
@@ -26,7 +27,10 @@ ConditionCodes::ConditionCodes()
  */
 ConditionCodes * ConditionCodes::getInstance()
 {
-   return NULL;
+   if(ccInstance == NULL) {
+       ccInstance = new ConditionCodes;
+   }
+   return ccInstance;
 }
 
 /*
@@ -44,7 +48,7 @@ bool ConditionCodes::getConditionCode(int32_t ccNum, bool & error)
 {
    //Use your getBits in Tools.C.
    //Don't use "magic" numbers.
-   return false;
+   return getBits(codes, ccNum, ccNum);
 }
 
 /*
