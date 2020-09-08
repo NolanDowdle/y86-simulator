@@ -6,7 +6,6 @@
 //regInstance will be initialized to the single RegisterFile
 //object that is created
 RegisterFile * RegisterFile::regInstance = NULL;
-int reg[15];
 
 /**
  * RegisterFile constructor

@@ -66,6 +66,7 @@ void ConditionCodesTester::doSetClearConditionCodeTests(int32_t ccNum)
    assert(error == false);
    code = this->cc->getConditionCode(ccNum, error);
    assert(error == false);
+   printf("Test: %d\n", code);
    assert(code == true);
 
    //set the condition code to false

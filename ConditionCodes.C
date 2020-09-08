@@ -6,7 +6,6 @@
 //cc_instance will be initialized to reference the single 
 //instance of ConditionCodes
 ConditionCodes * ConditionCodes::ccInstance = NULL;
-uint64_t code;
 
 /**
  * ConditionCodes constructor
@@ -14,7 +13,7 @@ uint64_t code;
  */
 ConditionCodes::ConditionCodes()
 {
-    code = 0;
+    codes = 0;
 }
 
 /**
@@ -48,8 +47,8 @@ bool ConditionCodes::getConditionCode(int32_t ccNum, bool & error)
 {
    //Use your getBits in Tools.C.
    //Don't use "magic" numbers.
-   if (ccNum >= 0 && ccNum < 0) {
-        Tools::getBits(code, ccNum, ccNum);
+   if (ccNum >= 0 && ccNum < 64) {
+        codes = Tools::getBits(codes, ccNum, ccNum);
         error = false;
    }
    else {
@@ -78,16 +77,15 @@ void ConditionCodes::setConditionCode(bool value, int32_t ccNum,
    if (ccNum >= 0 && ccNum < 64) {
         error = false;
         if (value) {
-            Tools::setBits(code, ccNum, ccNum);
+            codes = Tools::setBits(codes, ccNum, ccNum);
         }
         else {
-            Tools::clearBits(code, ccNum, ccNum);
+            codes = Tools::clearBits(codes, ccNum, ccNum);
         }
    }
    else {
         error = true;
    }
-   return;
 }
 
 /*
