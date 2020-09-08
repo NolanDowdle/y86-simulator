@@ -6,7 +6,7 @@
 //regInstance will be initialized to the single RegisterFile
 //object that is created
 RegisterFile * RegisterFile::regInstance = NULL;
-int reg[];
+int reg[15];
 
 /**
  * RegisterFile constructor
@@ -14,7 +14,7 @@ int reg[];
  */
 RegisterFile::RegisterFile()
 {
-    reg [] = { };  
+    reg[15] = { };  
 }
 
 /**
@@ -47,6 +47,11 @@ RegisterFile * RegisterFile::getInstance()
 */
 uint64_t RegisterFile::readRegister(int32_t regNumber, bool & error)
 {
+   if (regNumber >=0 && regNumber <= 14) {
+       error = false;
+       return reg[regNumber];
+   }
+   error = true;
    return 0;
 }
 
@@ -62,7 +67,13 @@ uint64_t RegisterFile::readRegister(int32_t regNumber, bool & error)
 void RegisterFile::writeRegister(uint64_t value, int32_t regNumber, 
                                  bool & error)
 {
-   return;
+    if (regNumber >= 0 && regNumber <= 14) {
+        reg[regNumber] = value;
+        error = false;
+    }
+    else {
+        error = true;
+    }
 }
 
 /**
