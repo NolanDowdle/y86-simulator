@@ -13,6 +13,7 @@ Memory * Memory::memInstance = NULL;
  */
 Memory::Memory()
 {
+    mem[MEMSIZE] = { };
 }
 
 /**
@@ -24,7 +25,10 @@ Memory::Memory()
  */
 Memory * Memory::getInstance()
 {
-   return NULL;
+    if (memInstance == NULL) {
+        memInstance = new Memory;    
+    }
+    return memInstance;
 }
 
 /**
@@ -40,7 +44,14 @@ Memory * Memory::getInstance()
  */
 uint64_t Memory::getLong(int32_t address, bool & imem_error)
 {
-   return 0;
+    if (address % 8 == 0) {
+        imem_error = false;
+    }
+    else {
+        imem_error = true;
+        return 0;
+    }
+    return mem[address];
 }
 
 /**
@@ -55,7 +66,14 @@ uint64_t Memory::getLong(int32_t address, bool & imem_error)
  */
 uint8_t Memory::getByte(int32_t address, bool & imem_error)
 {
-   return 0;
+    if (address % 2 == 0) {
+        imem_error = false;
+    }
+    else {
+        imem_error = true;
+        return 0;
+    }
+    return mem[address];
 }
 
 /**
