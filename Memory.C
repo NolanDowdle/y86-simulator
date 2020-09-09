@@ -44,7 +44,7 @@ Memory * Memory::getInstance()
  */
 uint64_t Memory::getLong(int32_t address, bool & imem_error)
 {
-    if (address % 8 == 0) {
+    if (address % 8 == 0 && address <= MEMSIZE && address >= 0) {
         imem_error = false;
     }
     else {
@@ -66,7 +66,7 @@ uint64_t Memory::getLong(int32_t address, bool & imem_error)
  */
 uint8_t Memory::getByte(int32_t address, bool & imem_error)
 {
-    if (address % 2 == 0) {
+    if (address <= MEMSIZE && address >= 0) {
         imem_error = false;
     }
     else {
@@ -89,6 +89,21 @@ uint8_t Memory::getByte(int32_t address, bool & imem_error)
  */
 void Memory::putLong(uint64_t value, int32_t address, bool & imem_error)
 {
+   if (address % 8 == 0 && address <= MEMSIZE && address >= 0) {
+        imem_error = false;
+        
+        for(int i = 0; i < 8; i++) {
+            //mem[address + i] = Tools::getBits(value, (i * 8), ((i + 1) * 8) - 1);
+            //printf("\naddress : %x", mem[address + i]);
+
+        }
+
+        //mem[address] = value;
+        //printf("\naddress : %x", mem[address]);
+        //printf("\nvalue : %x", value);
+   } else {
+        imem_error = true;
+   }
    return;
 }
 
@@ -105,6 +120,12 @@ void Memory::putLong(uint64_t value, int32_t address, bool & imem_error)
 
 void Memory::putByte(uint8_t value, int32_t address, bool & imem_error)
 {
+   if(address <= MEMSIZE && address >= 0) {
+       imem_error = false;
+       mem[address] = value;
+   } else {
+       imem_error = true;
+   }
    return;
 }
 

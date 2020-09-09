@@ -90,6 +90,8 @@ void MemoryTester::doPutGetLongTests()
       assert(error == false);
       lvalue = this->mem->getLong(addr, error);
       //long retrieved should be the same as that stored
+      //printf("getLong lvalue = %x\n", lvalue);
+      //printf("putLong svalue = %x\n", svalue);
       assert(lvalue == svalue);
       //address is valid so error should be false
       assert(error == false);
