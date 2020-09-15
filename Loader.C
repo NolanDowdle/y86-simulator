@@ -31,10 +31,15 @@
 Loader::Loader(int argc, char * argv[])
 {
    loaded = false;
-
+   
    //Start by writing a method that opens the file (checks whether it ends 
    //with a .yo and whether the file successfully opens; if not, return without 
-   //loading)
+   //loading) 
+    
+    //printf("%d", Loader::checkFile("asumr.yo"));
+    //if (Loader::checkFile("asumr.yo") == false) {
+    //    return;
+    //}
 
    //The file handle is declared in Loader.h.  You should use that and
    //not declare another one in this file.
@@ -73,3 +78,21 @@ bool Loader::isLoaded()
 //You'll need to add more helper methods to this file.  Don't put all of your code in the
 //Loader constructor.  When you add a method here, add the prototype to Loader.h in the private
 //section.
+
+bool Loader::checkFile(std::string fileName)
+{ 
+    if (fileName.substr(fileName.find_last_of(".") + 1) == "yo") 
+    {   
+        fstream fileStream;
+        fileStream.open(fileName);
+        if (fileStream.fail()) 
+        {
+            return false;
+        }
+        else
+        {   
+            return true;
+        }
+    }
+    return false;
+}
