@@ -37,9 +37,14 @@ Loader::Loader(int argc, char * argv[])
    //loading) 
     
     //printf("%d", Loader::checkFile("asumr.yo"));
-    //if (Loader::checkFile("asumr.yo") == false) {
-    //    return;
-    //}
+    //printf("%d", Loader::checkFile("nolan.yo"));
+    if(argc != 2) {
+        return;
+    }
+    if (Loader::checkFile(argv[1]) == false) {
+        return;
+    }
+   
 
    //The file handle is declared in Loader.h.  You should use that and
    //not declare another one in this file.
@@ -82,15 +87,9 @@ bool Loader::isLoaded()
 bool Loader::checkFile(std::string fileName)
 { 
     if (fileName.substr(fileName.find_last_of(".") + 1) == "yo") 
-    {   
-        fstream fileStream;
-        fileStream.open(fileName);
-        if (fileStream.fail()) 
+    { 
+        if (inf.is_open()) 
         {
-            return false;
-        }
-        else
-        {   
             return true;
         }
     }
