@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "MemoryTester.C": "cpp",
+        "Memory.C": "cpp",
+        "ConditionCodesTester.C": "cpp",
+        "ConditionCodes.C": "cpp"
+    }
+}
