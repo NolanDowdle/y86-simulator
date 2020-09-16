@@ -22,10 +22,10 @@ Memory.o: Memory.h Tools.h
 
 
 clean:
-	rm $(OBJ) lab4
+	rm $(OBJ) lab6
 
 run:
 	make clean
-	make lab4
+	make lab6
 	./run.sh
 

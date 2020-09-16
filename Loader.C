@@ -38,7 +38,7 @@ Loader::Loader(int argc, char * argv[])
     
     //printf("%d", Loader::checkFile("asumr.yo"));
     //printf("%d", Loader::checkFile("nolan.yo"));
-    if(argc != 2) {
+    if (argc != 2) {
         return;
     }
     if (Loader::checkFile(argv[1]) == false) {
@@ -50,7 +50,12 @@ Loader::Loader(int argc, char * argv[])
    //not declare another one in this file.
    
    //Next write a simple loop that reads the file line by line and prints it out
-   
+    
+    std::string line;
+    while (std::getline(inf, line)) {
+        std::cout << line << "\n";
+    }
+         
    //Next, add a method that will write the data in the line to memory 
    //(call that from within your loop)
 
@@ -86,10 +91,14 @@ bool Loader::isLoaded()
 
 bool Loader::checkFile(std::string fileName)
 { 
+    printf("is this working at all");
     if (fileName.substr(fileName.find_last_of(".") + 1) == "yo") 
-    { 
-        if (inf.is_open()) 
+    {   
+        inf.open(fileName);
+        printf("hello");
+        if (!inf.fail()) 
         {
+            printf("true");
             return true;
         }
     }
