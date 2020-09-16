@@ -114,16 +114,15 @@ void Loader::loadline(std::string line) {
             int32_t addr = Loader::convert(line, 2, 4);
             printf("%X\n", addr);
 
-            int x = 0;
-            for(int i = 8; line[i] != ' '; i++) {
-                x = i; 
+            int x = 7;
+            for(int i = 7; i < line.length(); i++) {
+                if (!isspace(line.at(i))) {
+                    x++;
+                }
             }
-            int32_t reg = Loader::convert(line, 8, x);
+            int32_t reg = Loader::convert(line, 7, x - 1);
             printf("%X\n", reg);
 
-            //printf(temp2);
-            //int x = stoul(temp2, NULL, 16);
-            //printf("%X\n", x);
             return;
         } else {
             return;
@@ -134,10 +133,6 @@ void Loader::loadline(std::string line) {
 }
 
 int32_t Loader::convert(std::string line, int a, int b) {
-    std::string temp;
-
-    for(int i = a; i <= b; i++) {
-        temp += line.at(i);
-    }
+    std::string temp = line.substr(a, b);
     return stoul(temp, NULL, 16);
 }
