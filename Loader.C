@@ -9,7 +9,7 @@
 
 #include "Loader.h"
 #include "Memory.h"
-#include "Tools.h"
+//#include "Tools.h"
 
 //first column in file is assumed to be 0
 #define ADDRBEGIN 2   //starting column of 3 digit hex address 
@@ -111,17 +111,24 @@ void Loader::loadline(std::string line) {
         if(line[DATABEGIN] != ' ') {
             //has data begin in column 7
             
-            int32_t addr = Loader::convert(line, 2, 4);
-            printf("%X\n", addr);
+            int32_t addr = Loader::convert(line, ADDRBEGIN, ADDREND);
+            
+            printf("%02X\n", addr);
+            std::string temp;
+            int32_t a;
+            bool f = false;
+            //bool f2 = &f;
+            for(int i = 7; line.at(i) != ' ' && line.at(i) != '|'; i = i + 2) {
+                temp = line.at(i);
+                temp += line.at(i + 1);
+                //printf("%c%c", line.at(i), line.at(i + 1));
+                a = Loader::convert(temp, 0, 2);
+                Memory::putByte(a, addr, f);
 
-            int x = 7;
-            for(int i = 7; i < line.length(); i++) {
-                if (!isspace(line.at(i))) {
-                    x++;
-                }
+                printf("%02X", a);
+
             }
-            int32_t reg = Loader::convert(line, 7, x - 1);
-            printf("%X\n", reg);
+            printf("\n");
 
             return;
         } else {
