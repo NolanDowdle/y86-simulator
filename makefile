@@ -10,7 +10,7 @@ lab6: $(OBJ)
 
 lab6.o: Memory.h RegisterFile.h ConditionCodes.h Loader.h
 
-Loader.o: Loader.h Memory.h
+Loader.o: Loader.h Memory.h Tools.h
 
 ConditionsCodes.o: Conditions.h Tools.h
 

@@ -1,6 +1,6 @@
 /**
- * Names:
- * Team:
+ * Names: Nolan Dowdle & Chase Faine
+ * Team: Nolan & Chase
 */
 #include <iostream>
 #include <fstream>
@@ -9,6 +9,7 @@
 
 #include "Loader.h"
 #include "Memory.h"
+#include "Tools.h"
 
 //first column in file is assumed to be 0
 #define ADDRBEGIN 2   //starting column of 3 digit hex address 
@@ -53,7 +54,8 @@ Loader::Loader(int argc, char * argv[])
     
     std::string line;
     while (std::getline(inf, line)) {
-        std::cout << line << "\n";
+        //std::cout << line << "\n";
+        Loader::loadline(line);
     }
          
    //Next, add a method that will write the data in the line to memory 
@@ -103,4 +105,27 @@ bool Loader::checkFile(std::string fileName)
         }
     }
     return false;
+}
+
+void Loader::loadline(std::string line) {
+    if(line[0] == '0') {
+        //has address in column 0
+
+        if(line[DATABEGIN] != ' ') {
+            //has data begin in column 7
+            
+            int32_t addr = Loader::convert(line, 2, 4);
+            printf("%d", addr);
+
+            return;
+        } else {
+            return;
+        }
+    } else {
+        return;
+    }
+}
+
+int32_t Loader::convert(std::string line, int a, int b) {
+    return stoul(line, NULL, 16);
 }
