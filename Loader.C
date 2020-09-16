@@ -93,14 +93,11 @@ bool Loader::isLoaded()
 
 bool Loader::checkFile(std::string fileName)
 { 
-    printf("is this working at all");
     if (fileName.substr(fileName.find_last_of(".") + 1) == "yo") 
     {   
         inf.open(fileName);
-        printf("hello");
         if (!inf.fail()) 
         {
-            printf("true");
             return true;
         }
     }
@@ -115,8 +112,7 @@ void Loader::loadline(std::string line) {
             //has data begin in column 7
             
             int32_t addr = Loader::convert(line, 2, 4);
-            printf("%d", addr);
-
+            printf("%X\n", addr);
             return;
         } else {
             return;
@@ -127,5 +123,9 @@ void Loader::loadline(std::string line) {
 }
 
 int32_t Loader::convert(std::string line, int a, int b) {
-    return stoul(line, NULL, 16);
+    std::string temp;
+    temp += line.at(2);
+    temp += line.at(3);
+    temp += line.at(4);
+    return stoul(temp, NULL, 16);
 }

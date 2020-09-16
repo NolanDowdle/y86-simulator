@@ -3,6 +3,7 @@
         "MemoryTester.C": "cpp",
         "Memory.C": "cpp",
         "ConditionCodesTester.C": "cpp",
-        "ConditionCodes.C": "cpp"
+        "ConditionCodes.C": "cpp",
+        "Loader.C": "cpp"
     }
 }
