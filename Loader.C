@@ -116,15 +116,15 @@ void Loader::loadline(std::string line) {
             printf("%02X\n", addr);
             std::string temp;
             int32_t a;
-            bool f = false;
-            //bool f2 = &f;
+            bool error = NULL;
+            bool f = &error;
+            Memory * memInstance = Memory::getInstance();
             for(int i = 7; line.at(i) != ' ' && line.at(i) != '|'; i = i + 2) {
                 temp = line.at(i);
                 temp += line.at(i + 1);
                 //printf("%c%c", line.at(i), line.at(i + 1));
                 a = Loader::convert(temp, 0, 2);
-                Memory::putByte(a, addr, f);
-
+                memInstance->putByte(a, addr, f);
                 printf("%02X", a);
 
             }
