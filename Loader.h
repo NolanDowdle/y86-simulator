@@ -7,6 +7,9 @@ class Loader
       bool checkFile(std::string fileName);
       void loadline(std::string line);
       int32_t convert(std::string line, int a, int b);
+      bool hasErrors(std::string line);
+      bool hasEmptyLine(std::string line);
+      bool correctAddress(std::string line);
       //uint8_t mem[MEMSIZE];
    public:
       Loader(int argc, char * argv[]);

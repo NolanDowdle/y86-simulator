@@ -53,9 +53,17 @@ Loader::Loader(int argc, char * argv[])
    //Next write a simple loop that reads the file line by line and prints it out
     
     std::string line;
+    int lineNumber = 0;
     while (std::getline(inf, line)) {
-        //std::cout << line << "\n";
         Loader::loadline(line);
+
+        if (Loader::hasErrors(line)) 
+        {
+        lineNumber = lineNumber + 1;
+        std::cout << "Error on line " << std::dec << lineNumber
+             << ": " << line << std::endl;
+        return;
+        }
     }
          
    //Next, add a method that will write the data in the line to memory 
@@ -67,7 +75,6 @@ Loader::Loader(int argc, char * argv[])
    //error message.  Change the variable names if you use different ones.
    //  std::cout << "Error on line " << std::dec << lineNumber
    //       << ": " << line << std::endl;
-
 
    //If control reaches here then no error was found and the program
    //was loaded into memory.
@@ -136,4 +143,29 @@ void Loader::loadline(std::string line) {
 int32_t Loader::convert(std::string line, int a, int b) {
     std::string temp = line.substr(a, b);
     return stoul(temp, NULL, 16);
+}
+
+bool Loader::hasErrors(std::string line) {
+    if(Loader::correctAddress(line) || Loader::hasEmptyLine()) {
+
+        return false;
+    }
+    return true;
+}
+
+bool Loader::hasEmptyLine(std::string line) {
+    if(line.substr(0, 27) == '                            ') {
+        return true;
+    }
+    return false;
+}
+
+bool Loader::correctAddress(std::string line) {
+    if(line.at(0) == '0' && line.at(1) == 'x') {
+            int32_t x = Loader::convert(line, ADDRBEGIN, ADDREND);
+            if(x >= 0 && x < 0x1000 && line.at(5) == ':' && line.at(6) == ' ') {
+                return true;
+            }
+    }
+    return false;
 }
