@@ -10,6 +10,8 @@ class Loader
       bool hasErrors(std::string line);
       bool hasEmptyLine(std::string line);
       bool correctAddress(std::string line);
+      bool hasPipe(std::string Line);
+      bool noOverflow(std::string line);
       //uint8_t mem[MEMSIZE];
    public:
       Loader(int argc, char * argv[]);
