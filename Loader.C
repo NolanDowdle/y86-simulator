@@ -112,35 +112,18 @@ void Loader::loadline(std::string line) {
             //has data begin in column 7
             
             int32_t addr = Loader::convert(line, ADDRBEGIN, ADDREND);
-            
-            //printf("%02X\n", addr);
             std::string temp;
             int32_t a;
-            bool error = NULL;
-            bool f = &error;
+            bool error;
             Memory * memInstance = Memory::getInstance();
             int counter = 0;
             for(int i = 7; line.at(i) != ' ' && line.at(i) != '|'; i = i + 2) {
                 temp = line.at(i);
                 temp += line.at(i + 1);
-                //printf("%c%c", line.at(i), line.at(i + 1));
-                //a = Loader::convert(temp, 0, 2);
-                a = stoul(temp, NULL, 16);
-                memInstance->putByte(a, addr + counter, f);
+                a = Loader::convert(temp, 0, 2);
+                memInstance->putByte(a, addr + counter, error);
                 counter = counter + 1;
-                
-                //maybe we need to add a counter to put the byte we get in the next memory location
-                //for example, we start at 0x55 but since we loop we have to put the next 2 bytes into
-                //0x56, then 0x57 etc.
-                
-                //Memory::getInstance()->putByte(a, addr + counter, f);
-                //counter = counter + 1;
-                //memInstance->putByte(a, addr, f);
-                printf("%02X", a);
-
             }
-            printf("\n");
-
             return;
         } else {
             return;
