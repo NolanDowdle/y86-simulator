@@ -9,10 +9,12 @@ class Loader
       int32_t convert(std::string line, int a, int b);
       bool hasErrors(std::string line);
       bool hasEmptyLine(std::string line);
+      bool hasEmptyData(std::string line);
       bool correctAddress(std::string line);
+      bool correctData(std::string line);
       bool hasPipe(std::string Line);
+      bool bytesDivisibleByTwo(std::string line);
       bool noOverflow(std::string line);
-      //uint8_t mem[MEMSIZE];
    public:
       Loader(int argc, char * argv[]);
       bool isLoaded();

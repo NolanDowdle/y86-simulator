@@ -53,8 +53,15 @@ Loader::Loader(int argc, char * argv[])
    //Next write a simple loop that reads the file line by line and prints it out
     
     std::string line;
+    int lineNumber = 0;
     while (std::getline(inf, line)) {
         Loader::loadline(line);
+        lineNumber = lineNumber + 1;
+        if (Loader::hasErrors(line)) {
+            std::cout << "Error on line " << std::dec << lineNumber
+                 << ": " << line << std::endl;
+            return;
+        }
     }
          
    //Next, add a method that will write the data in the line to memory 
@@ -67,13 +74,13 @@ Loader::Loader(int argc, char * argv[])
    //  std::cout << "Error on line " << std::dec << lineNumber
    //       << ": " << line << std::endl;
 
-    int lineNumber = 0;
+    /*int lineNumber = 0;
     if (Loader::hasErrors(line)) {
         lineNumber = lineNumber + 1;
         std::cout << "Error on line " << std::dec << lineNumber
             << ": " << line << std::endl;
         return;
-    }
+    }*/
 
    //If control reaches here then no error was found and the program
    //was loaded into memory.
@@ -145,20 +152,25 @@ int32_t Loader::convert(std::string line, int a, int b) {
 }
 
 bool Loader::hasErrors(std::string line) {
-    if (Loader::hasEmptyLine(line) && Loader::hasPipe(line)) {
+    if(Loader::hasEmptyLine(line) && Loader::hasPipe(line)) {
         return false;
     }
-    if(Loader::correctAddress(line) && Loader::hasPipe(line)) {
+    if(Loader::correctAddress(line) 
+        //&& Loader::correctData(line)
+        && Loader::hasPipe(line) 
+        && Loader::noOverflow(line)) 
+    {
         return false;
     }
     return true;
 }
 
 bool Loader::hasEmptyLine(std::string line) {
-    if(line.substr(0, 27) == "                            ") {
-        return true;
-    }
-    return false;
+    return (line.substr(0, 28) == "                            ");
+}
+
+bool Loader::hasEmptyData(std::string line) {
+    return (line.substr(7, 28) == "                     ");
 }
 
 bool Loader::hasPipe(std::string line) {
@@ -169,19 +181,38 @@ bool Loader::hasPipe(std::string line) {
 }
 
 bool Loader::correctAddress(std::string line) {
-    if(line.at(0) == '0' && line.at(1) == 'x') {
+    if(line.substr(0, 2) == "0x") {
             int32_t x = Loader::convert(line, ADDRBEGIN, ADDREND);
-            if(x >= 0 && x < 0x1000 && line.at(5) == ':' && line.at(6) == ' ') {
+            if(x >= 0 && x < 0x1000 && line.substr(5, 7) == ": ") {
                 return true;
             }
     }
     return false;
 }
 
+bool Loader::correctData(std::string line) {
+      if(Loader::hasEmptyData(line) || Loader::bytesDivisibleByTwo(line)) {
+          return true;
+      }
+
+        return false;
+}
+
+bool Loader::bytesDivisibleByTwo(std::string line) {
+    int bytes = 0;
+        for (int i = 7; line.substr(i, i + 1) != " "; i++) {
+            bytes = bytes + 1;
+        }
+        if(bytes % 2 == 1) {
+            return false;
+        }
+        return true;
+}
+
 bool Loader::noOverflow(std::string line) {
     int address = Loader::convert(line, 2, 4);
     int bytes = 0;
-    for (int i = 7; line.at(i) != ' '; i++) {
+    for (int i = 7; line.substr(i, i + 1) != " "; i++) {
         bytes = bytes + 1;
     }
     bytes = bytes / 2;
