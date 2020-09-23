@@ -152,73 +152,115 @@ int32_t Loader::convert(std::string line, int a, int b) {
 }
 
 bool Loader::hasErrors(std::string line) {
+    //printf("\n\nNEW LINE\n");
     if(Loader::hasEmptyLine(line) && Loader::hasPipe(line)) {
         return false;
     }
     if(Loader::correctAddress(line) 
-        //&& Loader::correctData(line)
+        && Loader::correctData(line)
         && Loader::hasPipe(line) 
         && Loader::noOverflow(line)) 
     {
         return false;
     }
+    //printf("NO ERRORS\n");
     return true;
 }
 
 bool Loader::hasEmptyLine(std::string line) {
+    //std::string str = line.substr(0, 28);
+    //std::cout << str << str.length() << "\n";
     return (line.substr(0, 28) == "                            ");
 }
 
 bool Loader::hasEmptyData(std::string line) {
-    return (line.substr(7, 28) == "                     ");
+    //std::string str = line.substr(6, 22);
+    //std::cout << str << str.length() << "\n";
+    return (line.substr(6, 22) == "                      ");
 }
 
 bool Loader::hasPipe(std::string line) {
-    if(line.at(28) == '|') {
+    if(line.substr(28, 1) == "|") {
+        //printf("HASPIPE PASSES\n");
         return true;
     }
+    //printf("HASPIPE FAILS\n");
     return false;
 }
 
 bool Loader::correctAddress(std::string line) {
     if(line.substr(0, 2) == "0x") {
             int32_t x = Loader::convert(line, ADDRBEGIN, ADDREND);
-            if(x >= 0 && x < 0x1000 && line.substr(5, 7) == ": ") {
+            if(x >= 0 && x <= 0x1000 && line.substr(5, 2) == ": ") {
+                //printf("X: %X\n", x);
                 return true;
             }
     }
+    //printf("CORRECTADDRESS FAILS\n");
     return false;
 }
 
 bool Loader::correctData(std::string line) {
-      if(Loader::hasEmptyData(line) || Loader::bytesDivisibleByTwo(line)) {
-          return true;
-      }
+    if(Loader::hasEmptyData(line) || (Loader::bytesDivisibleByTwo(line))) {
+        //printf("CORRECT DATA PASSES\n");
+        if (Loader::bytesDivisibleByTwo(line)) {
+            std::string str;
+            for (unsigned i = 7; line.substr(i, 1) != " " && i < line.length(); i++) {
+                str = line.substr(i, 1);
+                Loader::validCharacter(str);
+            }
+        }
+        return true;
+    }
+    //printf("CORRECT DATA FAILS\n");
+    return false;
+}
 
-        return false;
+bool Loader::validCharacter(std::string str) {
+    if (str == "a" || str == "A"
+        || str == "b" || str == "B"
+        || str == "c" || str == "C"
+        || str == "d" || str == "D"
+        || str == "e" || str == "E"
+        || str == "f" || str == "F"
+        || str == "1" || str == "2"
+        || str == "3" || str == "4"
+        || str == "5" || str == "6"
+        || str == "7" || str == "8"
+        || str == "9" || str == "0")
+    {
+        return true;
+    } 
+    //std::cout << str << "\n";
+    //printf("VALID CHARACTER FAILS\n");
+    return false;
 }
 
 bool Loader::bytesDivisibleByTwo(std::string line) {
     int bytes = 0;
-        for (int i = 7; line.substr(i, i + 1) != " "; i++) {
+        for (int i = 7; line.substr(i, 1) != " "; i++) {
             bytes = bytes + 1;
         }
-        if(bytes % 2 == 1) {
-            return false;
+        if(bytes % 2 == 0) {
+            //printf("BYTES: %d\n", bytes);
+            return true;
         }
-        return true;
+        //printf("BYTES FAILS\n");
+        return false;
 }
 
 bool Loader::noOverflow(std::string line) {
     int address = Loader::convert(line, 2, 4);
     int bytes = 0;
-    for (int i = 7; line.substr(i, i + 1) != " "; i++) {
+    for (unsigned i = 7; line.substr(i, 1) != " " && i < line.length(); i++) {
         bytes = bytes + 1;
     }
     bytes = bytes / 2;
     int sum = address + bytes;
     if (sum >= 0 && sum <= 0x1000) {
+        //printf("NO OVERFLOW PASSES\n");
         return true; 
-    }  
+    }
+    //printf("NO OVERFLOW FAILS\n");  
     return false; 
 }

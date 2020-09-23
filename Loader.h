@@ -15,6 +15,7 @@ class Loader
       bool hasPipe(std::string Line);
       bool bytesDivisibleByTwo(std::string line);
       bool noOverflow(std::string line);
+      bool validCharacter(std::string str);
    public:
       Loader(int argc, char * argv[]);
       bool isLoaded();
