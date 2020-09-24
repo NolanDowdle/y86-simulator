@@ -148,6 +148,8 @@ int32_t Loader::convert(std::string line, int a, int b) {
 bool Loader::hasErrors(std::string line) {
     //printf("\n\nNEW LINE\n");
     if(Loader::hasEmptyLine(line) && Loader::hasPipe(line)) {
+        holdAddress = 0;
+        holdBytes = 0;
         return false;
     }
 
@@ -238,7 +240,7 @@ bool Loader::correctNext(std::string line) {
     int32_t address = Loader::convert(line, ADDRBEGIN, ADDREND);
     int bytes = Loader::getByteNumbers(line);
     
-    if (holdAddress + holdBytes == address) {
+    if (holdAddress + holdBytes == address || holdAddress + holdBytes == 0) {
         holdAddress = address;
         holdBytes = bytes;
         return true;
