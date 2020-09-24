@@ -17,6 +17,9 @@
 #define DATABEGIN 7   //starting column of data bytes
 #define COMMENT 28    //location of the '|' character 
 
+int32_t holdAddress = 0;
+int holdBytes = 0;
+
 /**
  * Loader constructor
  * Opens the .yo file named in the command line arguments, reads the contents of the file
@@ -52,14 +55,7 @@ Loader::Loader(int argc, char * argv[])
     
     std::string line;
     int lineNumber = 0;
-    int32_t tempAddress = 0;
-    int numberOfBytes = 0;
-    int holdAddress = 0;
     while (std::getline(inf, line)) {
-        //Loader::loadline(line);
-        tempAddress = Loader::convert(line, ADDRBEGIN, ADDREND);
-        numberOfBytes = Loader::getByteNumbers(line);
-
         lineNumber = lineNumber + 1;
         if (Loader::hasErrors(line)) {
             std::cout << "Error on line " << std::dec << lineNumber
@@ -68,8 +64,6 @@ Loader::Loader(int argc, char * argv[])
             return;
         }
         Loader::loadline(line);
-
-        holdAddress = tempAddress + numberOfBytes;
     }
          
    //Next, add a method that will write the data in the line to memory 
@@ -156,10 +150,12 @@ bool Loader::hasErrors(std::string line) {
     if(Loader::hasEmptyLine(line) && Loader::hasPipe(line)) {
         return false;
     }
+
     if(Loader::correctAddress(line) 
         && Loader::correctData(line)
         && Loader::hasPipe(line) 
-        && Loader::noOverflow(line)) 
+        && Loader::noOverflow(line)
+        && Loader::correctNext(line)) 
     {
         return false;
     }
@@ -235,6 +231,19 @@ bool Loader::correctData(std::string line) {
         return true;
     }
     //printf("CORRECT DATA FAILS\n");
+    return false;
+}
+
+bool Loader::correctNext(std::string line) {
+    int32_t address = Loader::convert(line, ADDRBEGIN, ADDREND);
+    int bytes = Loader::getByteNumbers(line);
+    
+    if (holdAddress + holdBytes == address) {
+        holdAddress = address;
+        holdBytes = bytes;
+        return true;
+    }
+
     return false;
 }
 

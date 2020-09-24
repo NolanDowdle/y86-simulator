@@ -17,6 +17,7 @@ class Loader
       int getByteNumbers(std::string line);
       bool noOverflow(std::string line);
       bool validCharacter(std::string str);
+      bool correctNext(std::string line);
    public:
       Loader(int argc, char * argv[]);
       bool isLoaded();
