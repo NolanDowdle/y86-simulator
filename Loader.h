@@ -14,6 +14,7 @@ class Loader
       bool correctData(std::string line);
       bool hasPipe(std::string Line);
       bool bytesDivisibleByTwo(std::string line);
+      int getByteNumbers(std::string line);
       bool noOverflow(std::string line);
       bool validCharacter(std::string str);
    public:

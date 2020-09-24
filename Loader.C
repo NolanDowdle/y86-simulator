@@ -36,9 +36,7 @@ Loader::Loader(int argc, char * argv[])
    //Start by writing a method that opens the file (checks whether it ends 
    //with a .yo and whether the file successfully opens; if not, return without 
    //loading) 
-    
-    //printf("%d", Loader::checkFile("asumr.yo"));
-    //printf("%d", Loader::checkFile("nolan.yo"));
+
     if (argc != 2) {
         return;
     }
@@ -54,14 +52,24 @@ Loader::Loader(int argc, char * argv[])
     
     std::string line;
     int lineNumber = 0;
+    int32_t tempAddress = 0;
+    int numberOfBytes = 0;
+    int holdAddress = 0;
     while (std::getline(inf, line)) {
-        Loader::loadline(line);
+        //Loader::loadline(line);
+        tempAddress = Loader::convert(line, ADDRBEGIN, ADDREND);
+        numberOfBytes = Loader::getByteNumbers(line);
+
         lineNumber = lineNumber + 1;
         if (Loader::hasErrors(line)) {
             std::cout << "Error on line " << std::dec << lineNumber
                  << ": " << line << std::endl;
+
             return;
         }
+        Loader::loadline(line);
+
+        holdAddress = tempAddress + numberOfBytes;
     }
          
    //Next, add a method that will write the data in the line to memory 
@@ -73,14 +81,6 @@ Loader::Loader(int argc, char * argv[])
    //error message.  Change the variable names if you use different ones.
    //  std::cout << "Error on line " << std::dec << lineNumber
    //       << ": " << line << std::endl;
-
-    /*int lineNumber = 0;
-    if (Loader::hasErrors(line)) {
-        lineNumber = lineNumber + 1;
-        std::cout << "Error on line " << std::dec << lineNumber
-            << ": " << line << std::endl;
-        return;
-    }*/
 
    //If control reaches here then no error was found and the program
    //was loaded into memory.
@@ -203,12 +203,34 @@ bool Loader::correctAddress(std::string line) {
 bool Loader::correctData(std::string line) {
     if(Loader::hasEmptyData(line) || (Loader::bytesDivisibleByTwo(line))) {
         //printf("CORRECT DATA PASSES\n");
-        if (Loader::bytesDivisibleByTwo(line)) {
-            std::string str;
-            for (unsigned i = 7; line.substr(i, 1) != " " && i < line.length(); i++) {
-                str = line.substr(i, 1);
-                Loader::validCharacter(str);
+        if (!Loader::hasEmptyData(line)) {
+            if(line.substr(7, 1) == " " || line.substr(8, 1) == " ") {
+                return false;
             }
+
+
+            std::string str;
+            unsigned temp = 0;
+            for (unsigned i = 7; line.substr(i, 1) != " " &&  i < line.length(); i++) {
+                temp = i;
+                str = line.substr(i, 1);
+                if(!Loader::validCharacter(str)) {
+                    //std::cout << str << str.length() << "\n";
+                    
+                    return false;
+                }
+            }
+            temp = temp + 1;
+
+            if(line.substr(temp, 1) == " ") {
+                for(unsigned i = temp; i < 28; i++) {
+                    if(line.substr(i, 1) != " ") {
+                        return false;
+                    }
+                }
+            }
+
+            
         }
         return true;
     }
@@ -238,15 +260,23 @@ bool Loader::validCharacter(std::string str) {
 
 bool Loader::bytesDivisibleByTwo(std::string line) {
     int bytes = 0;
-        for (int i = 7; line.substr(i, 1) != " "; i++) {
-            bytes = bytes + 1;
-        }
-        if(bytes % 2 == 0) {
-            //printf("BYTES: %d\n", bytes);
-            return true;
-        }
-        //printf("BYTES FAILS\n");
-        return false;
+    for (int i = 7; line.substr(i, 1) != " "; i++) {
+        bytes = bytes + 1;
+    }
+    if(bytes % 2 == 0) {
+        //printf("BYTES: %d\n", bytes);
+        return true;
+    }
+    //printf("BYTES FAILS\n");
+    return false;
+}
+
+int Loader::getByteNumbers(std::string line) {
+    int bytes = 0;
+    for (unsigned i = 7; line.substr(i, 1) != " " && i < line.length(); i++) {
+        bytes = bytes + 1;
+    }
+    return (bytes / 2);
 }
 
 bool Loader::noOverflow(std::string line) {
