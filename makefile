@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -g -c -Wall -std=c++11 -O0
-OBJ = yess.o Memory.o Debug.h RegisterFile.o ConditionCodes.o Loader.o PipeReg.o Stage.o Simulate.o
+OBJ = yess.o PipeReg.o Simulate.o F.o D.o E.o M.o W.o FetchStage.o ExecuteStage.o WritebackStage.o DecodeStage.o MemoryStage.o PipeRegField.o Loader.o ConditionCodes.o RegisterFile.o Tools.o Memory.o
 
 .C.o:
 	$(CC) $(CFLAGS) $< -o $@
@@ -12,7 +12,7 @@ yess.o: Debug.h Memory.h RegisterFile.h ConditionCodes.h Loader.h PipeReg.h Stag
 
 PipeReg.o: PipeReg.h
 
-Simulate.o: F.h D.h E.h M.h W.h Stage.h ExecuteStage.h MemoryStage.h DecodeStage.h FetchStage.h WritebackStage.h Simulate.h Memory.h RegisterFile.h ConditionCodes.h
+Simulate.o: PipeRegField.h PipeReg.h F.h D.h E.h M.h W.h Stage.h ExecuteStage.h MemoryStage.h DecodeStage.h FetchStage.h WritebackStage.h Simulate.h Memory.h RegisterFile.h ConditionCodes.h
 
 F.o: PipeRegField.h PipeReg.h F.h
 
@@ -22,7 +22,17 @@ E.o: RegisterFile.h Instructions.h PipeRegField.h PipeReg.h E.h Status.h
 
 M.o: RegisterFile.h Instructions.h PipeRegField.h PipeReg.h M.h Status.h
 
-W.h: RegisterFile.h Instructions.h PipeRegField.h PipeReg.h W.h Status.h
+W.o: RegisterFile.h Instructions.h PipeRegField.h PipeReg.h W.h Status.h
+
+FetchStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h Stage.h FetchStage.h Status.h Debug.h
+
+WritebackStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h Stage.h FetchStage.h Status.h Debug.h
+
+ExecuteStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h Stage.h FetchStage.h Status.h Debug.h
+
+DecodeStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h Stage.h FetchStage.h Status.h Debug.h
+
+MemoryStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h Stage.h FetchStage.h Status.h Debug.h
 
 PipeRegField.o: PipeRegField.h
 
@@ -36,9 +46,8 @@ Tools.o: Tools.h
 
 Memory.o: Memory.h Tools.h
 
-
 clean:
-	rm *.o yess
+	rm $(OBJ) yess
 
 run:
 	make clean
