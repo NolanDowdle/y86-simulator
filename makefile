@@ -1,14 +1,30 @@
 CC = g++
 CFLAGS = -g -c -Wall -std=c++11 -O0
-OBJ = lab6.o Memory.o Tools.o RegisterFile.o ConditionCodes.o Loader.o
+OBJ = yess.o Memory.o Debug.h RegisterFile.o ConditionCodes.o Loader.o PipeReg.o Stage.o Simulate.o
 
 .C.o:
 	$(CC) $(CFLAGS) $< -o $@
 
-lab6: $(OBJ)
-	$(CC) $(OBJ) -o lab6
+yess: $(OBJ)
+	$(CC) $(OBJ) -o yess
 
-lab6.o: Memory.h RegisterFile.h ConditionCodes.h Loader.h
+yess.o: Debug.h Memory.h RegisterFile.h ConditionCodes.h Loader.h PipeReg.h Stage.h Simulate.h
+
+PipeReg.o: PipeReg.h
+
+Simulate.o: F.h D.h E.h M.h W.h Stage.h ExecuteStage.h MemoryStage.h DecodeStage.h FetchStage.h WritebackStage.h Simulate.h Memory.h RegisterFile.h ConditionCodes.h
+
+F.o: PipeRegField.h PipeReg.h F.h
+
+D.o: Instructions.h RegisterFile.h PipeReg.h PipeRegField.h D.h Status.h
+
+E.o: RegisterFile.h Instructions.h PipeRegField.h PipeReg.h E.h Status.h
+
+M.o: RegisterFile.h Instructions.h PipeRegField.h PipeReg.h M.h Status.h
+
+W.h: RegisterFile.h Instructions.h PipeRegField.h PipeReg.h W.h Status.h
+
+PipeRegField.o: PipeRegField.h
 
 Loader.o: Loader.h Memory.h Tools.h
 
@@ -22,10 +38,10 @@ Memory.o: Memory.h Tools.h
 
 
 clean:
-	rm $(OBJ) lab6
+	rm *.o yess
 
 run:
 	make clean
-	make lab6
+	make yess
 	./run.sh
 
