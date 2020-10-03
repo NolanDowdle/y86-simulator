@@ -7,6 +7,7 @@
 #include "D.h"
 #include "M.h"
 #include "W.h"
+#include "E.h"
 #include "Stage.h"
 #include "DecodeStage.h"
 #include "Status.h"
@@ -26,10 +27,11 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     F * freg = (F *) pregs[FREG];
     D * dreg = (D *) pregs[DREG];
     E * ereg = (E *) pregs[EREG];
-    uint64_t d_pc = freg.getpredPC(), stat = freg.getstat(), icode = freg.geticode(), ifun = freg.getifun(), valC = freg.getvalC()
-    uint64_t valA = 0, valB = 0, dstE = RNONE, dstM = RNONE, srcA = RNONE, srcB = RNONE
+    uint64_t f_pc = freg->getpredPC()->getOutput();
+    uint64_t stat = dreg->getstat()->getOutput(), icode = dreg->geticode()->getOutput(), ifun = dreg->getifun()->getOutput(), valC = dreg->getvalC()->getOutput();
+    uint64_t valA = 0, valB = 0, dstE = RNONE, dstM = RNONE, srcA = RNONE, srcB = RNONE;
 
-    dreg->getpredPC()->setInput(d_pc + 1)
+    freg->getpredPC()->setInput(f_pc + 1);
 
     setEInput(ereg, stat, icode, ifun, valC, valA, valB, dstE, dstM, srcA, srcB);
     return false;
@@ -44,10 +46,10 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 void DecodeStage::doClockHigh(PipeReg ** pregs)
 {
     F * freg = (F *) pregs[FREG];
-    D * dreg = (D *) pregs[DREG];
+    //D * dreg = (D *) pregs[DREG];
     E * ereg = (E *) pregs[EREG];
 
-    dreg = getpredPC()->normal();
+    freg->getpredPC()->normal();
     ereg->getstat()->normal();
     ereg->geticode()->normal();
     ereg->getifun()->normal();

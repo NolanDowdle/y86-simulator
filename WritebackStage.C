@@ -7,6 +7,7 @@
 #include "D.h"
 #include "M.h"
 #include "W.h"
+#include "E.h"
 #include "Stage.h"
 #include "WritebackStage.h"
 #include "Status.h"
@@ -23,7 +24,7 @@
  */
 bool WritebackStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
-    return false;
+    return true;
 }
 
 /* doClockHigh
