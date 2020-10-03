@@ -23,10 +23,15 @@
  */
 bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
+    F * freg = (F *) pregs[FREG];
     D * dreg = (D *) pregs[DREG];
     E * ereg = (E *) pregs[EREG];
+    uint64_t d_pc = freg.getpredPC(), stat = freg.getstat(), icode = freg.geticode(), ifun = freg.getifun(), valC = freg.getvalC()
+    uint64_t valA = 0, valB = 0, dstE = RNONE, dstM = RNONE, srcA = RNONE, srcB = RNONE
 
-    DecodeStage::setEInput();
+    dreg->getpredPC()->setInput(d_pc + 1)
+
+    setEInput(ereg, stat, icode, ifun, valC, valA, valB, dstE, dstM, srcA, srcB);
     return false;
 }
 
@@ -38,7 +43,21 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
  */
 void DecodeStage::doClockHigh(PipeReg ** pregs)
 {
-   
+    F * freg = (F *) pregs[FREG];
+    D * dreg = (D *) pregs[DREG];
+    E * ereg = (E *) pregs[EREG];
+
+    dreg = getpredPC()->normal();
+    ereg->getstat()->normal();
+    ereg->geticode()->normal();
+    ereg->getifun()->normal();
+    ereg->getvalC()->normal();
+    ereg->getvalA()->normal();
+    ereg->getvalB()->normal();
+    ereg->getdstE()->normal();
+    ereg->getdstM()->normal();
+    ereg->getsrcA()->normal();
+    ereg->getsrcB()->normal();
 }
 
 void DecodeStage::setEInput(E * ereg, uint64_t stat, uint64_t icode,
