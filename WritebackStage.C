@@ -24,7 +24,12 @@
  */
 bool WritebackStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
-    return true;
+    W * wreg = (W *) pregs[WREG];
+    uint64_t icode = wreg->geticode()->getOutput();
+    if (icode == 0x00) {
+        return true;
+    }
+    return false;
 }
 
 /* doClockHigh
