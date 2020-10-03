@@ -31,7 +31,7 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t stat = dreg->getstat()->getOutput(), icode = dreg->geticode()->getOutput(), ifun = dreg->getifun()->getOutput(), valC = dreg->getvalC()->getOutput();
     uint64_t valA = 0, valB = 0, dstE = RNONE, dstM = RNONE, srcA = RNONE, srcB = RNONE;
 
-    freg->getpredPC()->setInput(f_pc + 1);
+    freg->getpredPC()->setInput(f_pc);
 
     setEInput(ereg, stat, icode, ifun, valC, valA, valB, dstE, dstM, srcA, srcB);
     return false;
