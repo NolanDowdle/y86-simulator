@@ -31,7 +31,7 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    D * dreg = (D *) pregs[DREG];
    M * mreg = (M *) pregs[MREG];
    W * wreg = (W *) pregs[WREG];
-   uint64_t ifun = 0, valC = 0, valP = 0;
+   uint64_t valC = 0;
    uint64_t rA = RNONE, rB = RNONE, stat = SAOK;
 
    //code missing here to select the value of the PC
@@ -40,19 +40,24 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    Memory * memInstance = Memory::getInstance();
    bool error;
    uint8_t word = memInstance->getByte(f_pc, error);
-   printf("Word: %X\n", word);
+   //printf("Word: %X\n", word);
+   //printf("Address: %X\n", f_pc);
    //Fetching the instruction will allow the icode, ifun,
    //rA, rB, and valC to be set.
-   uint64_t icode = Tools::getBits(word, 0, 3);
-   printf("icode: %X\n", icode);
+   uint8_t ifun = Tools::getBits(word, 0, 3);
+   uint8_t icode = Tools::getBits(word, 4, 7);
+   //printf("icode: %X\n", icode);
+   //printf("ifun: %X\n", ifun);
    //The lab assignment describes what methods need to be
    //written.
 
-   //bool needRegIds = FetchStage::needRegIds();
-   //bool needValC = FetchStage::needValC();
+   bool needRegIds = FetchStage::needRegIds(icode);
+   bool needValC = FetchStage::needValC(icode);
 
    //The value passed to setInput below will need to be changed
-   //freg->getpredPC()->setInput(PCincrement(f_pc, needRegIds, needValC));
+   uint64_t valP = FetchStage::PCincrement(f_pc, needRegIds, needValC);
+   //uint64_t f_predPC = FetchStage::predictPC(icode, valC, valP);
+   freg->getpredPC()->setInput(FetchStage::predictPC(icode, valC, valP));
 
    //provide the input values for the D register
    setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
@@ -161,5 +166,11 @@ uint64_t FetchStage::predictPC(uint64_t f_icode, uint64_t f_valC, uint64_t f_val
 }
 
 uint64_t FetchStage::PCincrement(uint64_t f_pc, bool needRegIds, bool needValC) {
-   return 0;
+   if (needValC) {
+      if(needRegIds) {
+         return f_pc + 8;
+      }
+      return f_pc + 9;
+   }
+   return f_pc + 1;
 }
