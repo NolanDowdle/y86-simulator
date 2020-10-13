@@ -32,7 +32,7 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t f_pc = freg->getpredPC()->getOutput();
     uint64_t stat = ereg->getstat()->getOutput(), icode = ereg->geticode()->getOutput();
     uint64_t Cnd = 0;
-    uint64_t valE = 0;
+    uint64_t valE = ereg->getvalC()->getOutput();
     uint64_t valA = ereg->getvalA()->getOutput();
     uint64_t dstE = ereg->getdstE()->getOutput(), dstM = ereg->getdstM()->getOutput();
 

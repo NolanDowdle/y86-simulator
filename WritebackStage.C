@@ -29,6 +29,7 @@ bool WritebackStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     if (icode == 0x00) {
         return true;
     }
+
     return false;
 }
 
@@ -40,5 +41,8 @@ bool WritebackStage::doClockLow(PipeReg ** pregs, Stage ** stages)
  */
 void WritebackStage::doClockHigh(PipeReg ** pregs)
 {
-   
+    W * wreg = (W *) pregs[WREG];
+    RegisterFile * regInstance = RegisterFile::getInstance();
+    bool error;
+    regInstance->writeRegister(wreg->getvalE()->getOutput(), wreg->getdstE()->getOutput(), error);
 }
