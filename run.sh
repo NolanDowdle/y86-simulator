@@ -3,10 +3,10 @@
 rm -f -r Outputs
 mkdir Outputs
 chmod g+rwx Outputs
-dir="/u/css/classes/3481/194/lab7/Tests"
+dir="/u/css/classes/3481/194/lab8/Tests"
 tests=( error1 error2 error3 error4 error5 error6
         error7 error8 error9 error10 error11 error12 
-        error13 error14 error15 nop )
+        error13 error14 error15 nop irmovq )
 
 numTests=0
 numPasses=0

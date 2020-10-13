@@ -59,6 +59,15 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    //uint64_t f_predPC = FetchStage::predictPC(icode, valC, valP);
    freg->getpredPC()->setInput(FetchStage::predictPC(icode, valC, valP));
 
+   if (needRegIds == true) {
+      rA = FetchStage::getRegIds(Tools::getBits(word, 12, 15));
+      rB = FetchStage::getRegIds(Tools::getBits(word, 8, 11));
+   }
+
+   if (needValC == true) {
+      valC = FetchStage::buildValC(Tools::getBits(word, 16, 63));
+   }
+
    //provide the input values for the D register
    setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
    return false;
@@ -173,4 +182,12 @@ uint64_t FetchStage::PCincrement(uint64_t f_pc, bool needRegIds, bool needValC) 
       return f_pc + 9;
    }
    return f_pc + 1;
+}
+
+uint64_t FetchStage::getRegIds(uint64_t regId) {
+   return regId;
+}
+
+uint64_t FetchStage::buildValC(uint64_t valC) {
+   return valC;
 }
