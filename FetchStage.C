@@ -14,6 +14,7 @@
 #include "Debug.h"
 #include "Memory.h"
 #include "Tools.h"
+#include "Instructions.h"
 
 
 /*
@@ -60,16 +61,26 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    freg->getpredPC()->setInput(FetchStage::predictPC(icode, valC, valP));
 
    if (needRegIds == true) {
-      rA = FetchStage::getRegIds(Tools::getBits(word, 12, 15));
-      rB = FetchStage::getRegIds(Tools::getBits(word, 8, 11));
-   }
-
-   if (needValC == true) {
-      valC = FetchStage::buildValC(Tools::getBits(word, 16, 63));
+      uint8_t regIds = FetchStage::getRegIds(f_pc);
+      rA = Tools::getBits(regIds, 4, 7);
+      rB = Tools::getBits(regIds, 0, 3);
+      if (needValC == true) {
+         valC = FetchStage::buildValC(memInstance->getByte(f_pc + 2, error));
+      } else {
+         valC = 0;
+      }
+   } else {
+      if (needValC == true) {
+         valC = FetchStage::buildValC(memInstance->getByte(f_pc + 1, error));
+      } else {
+         valC = 0;
+      }
+      rA = RNONE;
+      rB = RNONE;
    }
 
    //provide the input values for the D register
-   setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
+   FetchStage::setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
    return false;
 }
 
@@ -127,8 +138,6 @@ uint64_t FetchStage::selectPC(F * freg, M * mreg, W * wreg) {
    uint64_t m_icode = mreg->geticode()->getOutput();
    uint64_t w_icode = wreg->geticode()->getOutput();
    uint64_t w_valM = wreg->getvalM()->getOutput();
-   uint64_t IJXX = 7;
-   uint64_t IRET = 9;
    if (m_icode == IJXX && !m_Cnd) {
       return m_valA;
    }
@@ -139,13 +148,6 @@ uint64_t FetchStage::selectPC(F * freg, M * mreg, W * wreg) {
 }
 
 bool FetchStage::needRegIds(uint64_t f_icode) {
-   uint64_t IRRMOVQ = 2;
-   uint64_t IOPQ = 6;
-   uint64_t IPUSHQ = 10;
-   uint64_t IPOPQ = 11;
-   uint64_t IIRMOVQ = 3;
-   uint64_t IRMMOVQ = 4;
-   uint64_t IMRMOVQ = 5;
    if (f_icode == IRRMOVQ || f_icode == IOPQ || f_icode == IPUSHQ || f_icode == IPOPQ
       || f_icode == IIRMOVQ || f_icode == IRMMOVQ || f_icode == IMRMOVQ) {
          return true;
@@ -154,11 +156,6 @@ bool FetchStage::needRegIds(uint64_t f_icode) {
 }
 
 bool FetchStage::needValC(uint64_t f_icode) {
-   uint64_t IIRMOVQ = 3;
-   uint64_t IRMMOVQ = 4;
-   uint64_t IMRMOVQ = 5;
-   uint64_t IJXX = 7;
-   uint64_t ICALL = 8;
    if (f_icode == IIRMOVQ || f_icode == IRMMOVQ || f_icode == IMRMOVQ || f_icode == IJXX || f_icode == ICALL) {
       return true;
    }
@@ -166,8 +163,6 @@ bool FetchStage::needValC(uint64_t f_icode) {
 }
 
 uint64_t FetchStage::predictPC(uint64_t f_icode, uint64_t f_valC, uint64_t f_valP) {
-   uint64_t IJXX = 7;
-   uint64_t ICALL = 8;
    if (f_icode == IJXX || f_icode == ICALL) {
       return f_valC;
    }
@@ -184,10 +179,22 @@ uint64_t FetchStage::PCincrement(uint64_t f_pc, bool needRegIds, bool needValC) 
    return f_pc + 1;
 }
 
-uint64_t FetchStage::getRegIds(uint64_t regId) {
-   return regId;
+uint8_t FetchStage::getRegIds(uint64_t f_pc) {
+   Memory * memInstance = Memory::getInstance();
+   bool error;
+   return Tools::getByte(f_pc, 1);
 }
 
 uint64_t FetchStage::buildValC(uint64_t valC) {
-   return valC;
+   //make instance of memory
+   //loop & getByte()
+
+   Memory * memInstance = Memory::getInstance();
+   uint64_t word = 0;
+   bool error;
+   for (int i = 0; i < 8; i++) {
+      word = memInstance->getByte(valC + i, error);
+      word = word << 8;
+   }
+   return word;
 }

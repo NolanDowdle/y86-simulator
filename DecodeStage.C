@@ -12,6 +12,7 @@
 #include "DecodeStage.h"
 #include "Status.h"
 #include "Debug.h"
+#include "Instructions.h"
 
 /*
  * doClockLow:
@@ -32,13 +33,13 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 
     freg->getpredPC()->setInput(f_pc);
 
-    uint64_t srcA = DecodeStage::d_srcA(icode, dreg->getrA()->getOutput());
-    uint64_t srcB = DecodeStage::d_srcB(icode, dreg->getrB()->getOutput());
-    uint64_t dstE = DecodeStage::d_dstE(icode, dreg->getrB()->getOutput());
-    uint64_t dstM = DecodeStage::d_dstM(icode, dreg->getrA()->getOutput());
-    uint64_t valA = DecodeStage::d_valA(dreg->getrA()->getOutput());
-    uint64_t valB = DecodeStage::d_valB(dreg->getrB()->getOutput());
-    setEInput(ereg, stat, icode, ifun, valC, valA, valB, dstE, dstM, srcA, srcB);
+    uint64_t srcA = d_srcA(icode, dreg->getrA()->getOutput());
+    uint64_t srcB = d_srcB(icode, dreg->getrB()->getOutput());
+    uint64_t dstE = d_dstE(icode, dreg->getrB()->getOutput());
+    uint64_t dstM = d_dstM(icode, dreg->getrA()->getOutput());
+    uint64_t valA = d_valA(dreg->getrA()->getOutput());
+    uint64_t valB = d_valB(dreg->getrB()->getOutput());
+    DecodeStage::setEInput(ereg, stat, icode, ifun, valC, valA, valB, dstE, dstM, srcA, srcB);
     return false;
 }
 
@@ -84,59 +85,36 @@ void DecodeStage::setEInput(E * ereg, uint64_t stat, uint64_t icode,
 }
 
 uint64_t DecodeStage::d_srcA(uint64_t icode, uint64_t rA) {
-    uint64_t IRRMOVQ = 2;
-    uint64_t IOPQ = 6;
-    uint64_t IPUSHQ = 10;
-    uint64_t IRMMOVQ = 4;
-    uint64_t IRET = 9;
-    uint64_t rsp = 4;
     if(icode == IRRMOVQ || icode == IRMMOVQ || icode == IOPQ || icode == IPUSHQ) {
         return rA;
     } else if (icode == IOPQ || icode == IRET) {
-        return rsp;
+        return RSP;
     } else {
         return RNONE;
     }
 }
 
 uint64_t DecodeStage::d_srcB(uint64_t icode, uint64_t rB) {
-    uint64_t IOPQ = 6;
-    uint64_t IMRMOVQ = 5;
-    uint64_t IPUSHQ = 10;
-    uint64_t IRMMOVQ = 4;
-    uint64_t IRET = 9;
-    uint64_t ICALL = 8;
-    uint64_t rsp = 4;
     if(icode == IOPQ || icode == IMRMOVQ || icode == IRMMOVQ) {
         return rB;
     } else if (icode == IOPQ || icode == IRET || icode == ICALL || icode == IPUSHQ) {
-        return rsp;
+        return RSP;
     } else {
         return RNONE;
     }
 }
 
 uint64_t DecodeStage::d_dstE(uint64_t icode, uint64_t rB) {
-    uint64_t IOPQ = 6;
-    uint64_t IRRMOVQ = 2;
-    uint64_t IIRMOVQ = 3;
-    uint64_t IPUSHQ = 10;
-    uint64_t IPOPQ = 6;
-    uint64_t ICALL = 8;
-    uint64_t IRET = 9;
-    uint64_t rsp = 4;
     if (icode == IOPQ || icode == IRRMOVQ || icode == IIRMOVQ) {
         return rB;
     } else if (icode == IPUSHQ || icode == IPOPQ || icode == ICALL || icode == IRET) {
-        return rsp;
+        return RSP;
     } else  {
         return RNONE;
     }
 }
 
 uint64_t DecodeStage::d_dstM(uint64_t icode, uint64_t rA) {
-    uint64_t IMRMOVQ = 5;
-    uint64_t IPOPQ = 6;
     if (icode == IMRMOVQ || icode == IPOPQ) {
         return rA;
     } else  {

@@ -37,7 +37,7 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t dstE = ereg->getdstE()->getOutput(), dstM = ereg->getdstM()->getOutput();
 
     freg->getpredPC()->setInput(f_pc);
-    setMInput(mreg, stat, icode, Cnd, valA, valE, dstE, dstM);
+    ExecuteStage::setMInput(mreg, stat, icode, Cnd, valA, valE, dstE, dstM);
 
     return false;
 }

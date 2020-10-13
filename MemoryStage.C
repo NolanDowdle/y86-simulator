@@ -36,7 +36,7 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t f_pc = freg->getpredPC()->getOutput();
 
     freg->getpredPC()->setInput(f_pc);
-    setWInput(wreg, stat, icode, valM, valE, dstE, dstM);
+    MemoryStage::setWInput(wreg, stat, icode, valM, valE, dstE, dstM);
     return false;
 }
 
