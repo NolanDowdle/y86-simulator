@@ -37,6 +37,15 @@ int main(int argc, char * argv[])
    }
   
    Simulate simulate;
+
+   //added lines 42 through 46 in order to clear all registers before running the simulation
+   RegisterFile * regInstance = RegisterFile::getInstance();
+    bool error;
+    for (unsigned int i = 0; i < 15; i++) {
+       regInstance->writeRegister(0, i, error);
+    }
+
+
    simulate.run(); 
    
    return 0;

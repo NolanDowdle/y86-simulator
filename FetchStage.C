@@ -57,21 +57,19 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 
    //The value passed to setInput below will need to be changed
    uint64_t valP = FetchStage::PCincrement(f_pc, needRegIds, needValC);
-   //uint64_t f_predPC = FetchStage::predictPC(icode, valC, valP);
-   freg->getpredPC()->setInput(FetchStage::predictPC(icode, valC, valP));
 
    if (needRegIds == true) {
-      uint8_t regIds = FetchStage::getRegIds(f_pc);
+      uint8_t regIds = getRegIds(f_pc);
       rA = Tools::getBits(regIds, 4, 7);
       rB = Tools::getBits(regIds, 0, 3);
       if (needValC == true) {
-         valC = FetchStage::buildValC(memInstance->getByte(f_pc + 2, error));
+         valC = buildValC(f_pc, needRegIds);
       } else {
          valC = 0;
       }
    } else {
       if (needValC == true) {
-         valC = FetchStage::buildValC(memInstance->getByte(f_pc + 1, error));
+         valC = buildValC(f_pc, needRegIds);
       } else {
          valC = 0;
       }
@@ -79,8 +77,10 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
       rB = RNONE;
    }
 
+   freg->getpredPC()->setInput(FetchStage::predictPC(icode, valC, valP));
+
    //provide the input values for the D register
-   FetchStage::setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
+   setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
    return false;
 }
 
@@ -172,9 +172,9 @@ uint64_t FetchStage::predictPC(uint64_t f_icode, uint64_t f_valC, uint64_t f_val
 uint64_t FetchStage::PCincrement(uint64_t f_pc, bool needRegIds, bool needValC) {
    if (needValC) {
       if(needRegIds) {
-         return f_pc + 8;
+         return f_pc + 10;
       }
-      return f_pc + 9;
+      return f_pc + 11;
    }
    return f_pc + 1;
 }
@@ -182,19 +182,28 @@ uint64_t FetchStage::PCincrement(uint64_t f_pc, bool needRegIds, bool needValC) 
 uint8_t FetchStage::getRegIds(uint64_t f_pc) {
    Memory * memInstance = Memory::getInstance();
    bool error;
-   return Tools::getByte(f_pc, 1);
+   return memInstance->getByte(f_pc + 1, error);
 }
 
-uint64_t FetchStage::buildValC(uint64_t valC) {
-   //make instance of memory
-   //loop & getByte()
-
+uint64_t FetchStage::buildValC(uint64_t f_pc, bool needRegIds) {
    Memory * memInstance = Memory::getInstance();
    uint64_t word = 0;
    bool error;
-   for (int i = 0; i < 8; i++) {
-      word = memInstance->getByte(valC + i, error);
-      word = word << 8;
+
+   if (needRegIds) {
+      for (unsigned int i = 9; i >= 2; i--) {
+         word += memInstance->getByte(f_pc + i, error);
+         if(i != 2) {
+            word = word << 8;
+         }
+      }
+   } else {
+      for (unsigned int i = 8; i >= 1; i--) {
+         word += memInstance->getByte(f_pc + i, error);
+         if(i != 1) {
+            word = word << 8;
+         }
+      }
    }
    return word;
 }
