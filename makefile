@@ -28,7 +28,7 @@ FetchStage.o: Instructions.h RegisterFile.h Memory.h Tools.h PipeRegField.h Pipe
 
 WritebackStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h E.h Stage.h FetchStage.h Status.h Debug.h
 
-ExecuteStage.o: Instructions.h ConditionCodes.h RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h E.h Stage.h FetchStage.h Status.h Debug.h
+ExecuteStage.o: Tools.h Instructions.h ConditionCodes.h RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h E.h Stage.h FetchStage.h Status.h Debug.h
 
 DecodeStage.o: Instructions.h RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h E.h Stage.h FetchStage.h Status.h Debug.h
 

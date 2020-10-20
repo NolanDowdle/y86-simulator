@@ -174,7 +174,11 @@ uint64_t FetchStage::PCincrement(uint64_t f_pc, bool needRegIds, bool needValC) 
       if(needRegIds) {
          return f_pc + 10;
       }
-      return f_pc + 11;
+      return f_pc + 9;
+   } else {
+      if(needRegIds) {
+         return f_pc + 2;
+      }
    }
    return f_pc + 1;
 }

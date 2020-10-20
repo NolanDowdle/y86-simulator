@@ -14,6 +14,7 @@
 #include "Debug.h"
 #include "Instructions.h"
 #include "ConditionCodes.h"
+#include "Tools.h"
 
 
 /*
@@ -30,13 +31,16 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
     E * ereg = (E *) pregs[EREG];
+    //D * dreg = (D *) pregs[DREG];
 
     uint64_t f_pc = freg->getpredPC()->getOutput();
     uint64_t stat = ereg->getstat()->getOutput(), icode = ereg->geticode()->getOutput();
+    
     uint64_t Cnd = 0;
     uint64_t valE = ereg->getvalC()->getOutput();
     uint64_t valA = ereg->getvalA()->getOutput();
     uint64_t dstE = ereg->getdstE()->getOutput(), dstM = ereg->getdstM()->getOutput();
+    uint64_t valB = ereg->getvalB()->getOutput();
 
     freg->getpredPC()->setInput(f_pc);
     ExecuteStage::setMInput(mreg, stat, icode, Cnd, valA, valE, dstE, dstM);
@@ -126,16 +130,90 @@ uint64_t ExecuteStage::e_dstE(uint64_t icode, uint64_t dstE, uint64_t e_Cnd) {
     return dstE;
 }
 
-void ExecuteStage::CC(uint64_t icode) {
+void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2) {
     if (set_cc(icode)) {
         ConditionCodes * codeInstance = ConditionCodes::getInstance();
-        //M * mreg = (M *) pregs[MREG];
-        //W * wreg = (W *) pregs[WREG];
-        //uint64_t W_stat = wreg->getstat()->getOutput();
-        //uint64_t m_stat = mreg-> getstat()->getOutput();
         bool error;
-        codeInstance->setConditionCode(1, OF, error);
-        codeInstance->setConditionCode(1, ZF, error);
-        codeInstance->setConditionCode(1, SF, error);
+        if(ifun == ADDQ) {
+            if (Tools::addOverflow(op1, op2)) {
+                codeInstance->setConditionCode(1, OF, error);
+            } else {
+                codeInstance->setConditionCode(0, OF, error);
+            }
+            if (Tools::sign(op1 + op2)) {
+                codeInstance->setConditionCode(1, SF, error);
+            } else {
+                codeInstance->setConditionCode(0, SF, error);
+            }
+            if ((op1 + op2) == 0) {
+                codeInstance->setConditionCode(1, ZF, error);
+            } else {
+                codeInstance->setConditionCode(0, ZF, error);
+            }
+        }
+        if (ifun == SUBQ) {
+            if (Tools::subOverflow(op1, op2)) {
+                codeInstance->setConditionCode(1, OF, error);
+            } else {
+                codeInstance->setConditionCode(0, OF, error);
+            }
+            if (Tools::sign(op1 - op2)) {
+                codeInstance->setConditionCode(1, SF, error);
+            } else {
+                codeInstance->setConditionCode(0, SF, error);
+            }
+            if ((op1 - op2) == 0) {
+                codeInstance->setConditionCode(1, ZF, error);
+            } else {
+                codeInstance->setConditionCode(0, ZF, error);
+            }
+        }
+        if (ifun == XORQ) {
+            codeInstance->setConditionCode(0, OF, error);
+            if (Tools::sign(op1 ^ op2)) {
+                codeInstance->setConditionCode(1, SF, error);
+            } else {
+                codeInstance->setConditionCode(0, SF, error);
+            }
+            if ((op1 ^ op2) == 0) {
+                codeInstance->setConditionCode(1, ZF, error);
+            } else {
+                codeInstance->setConditionCode(0, ZF, error);
+            }
+        }
+        if (ifun == ANDQ) {
+            codeInstance->setConditionCode(0, OF, error);
+            if (Tools::sign(op1 & op2)) {
+                codeInstance->setConditionCode(1, SF, error);
+            } else {
+                codeInstance->setConditionCode(0, SF, error);
+            }
+            if ((op1 & op2) == 0) {
+                codeInstance->setConditionCode(1, ZF, error);
+            } else {
+                codeInstance->setConditionCode(0, ZF, error);
+            }
+        }
     }
+}
+
+uint64_t ExecuteStage::ALU(uint64_t icode, uint64_t ifun, uint64_t aluA, uint64_t aluB) {
+    uint64_t alufun1 = alufun(icode, ifun);
+    if (alufun1 == ADDQ) {
+        CC(icode, ifun, aluA, aluB);
+        return aluA + aluB;
+    }
+    if (alufun1 == SUBQ) {
+        CC(icode, ifun, aluA, aluB);
+        return aluA - aluB;
+    }
+    if (alufun1 == XORQ) {
+        CC(icode, ifun, aluA, aluB);
+        return aluA ^ aluB;
+    }
+    if (alufun1 == ANDQ) {
+        CC(icode, ifun, aluA, aluB);
+        return aluA & aluB;
+    }
+    return 0;
 }
