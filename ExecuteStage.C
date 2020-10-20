@@ -12,6 +12,8 @@
 #include "ExecuteStage.h"
 #include "Status.h"
 #include "Debug.h"
+#include "Instructions.h"
+#include "ConditionCodes.h"
 
 
 /*
@@ -74,4 +76,66 @@ void ExecuteStage::setMInput(M * mreg, uint64_t stat, uint64_t icode,
     mreg->getvalE()->setInput(valE);
     mreg->getdstE()->setInput(dstE);
     mreg->getdstM()->setInput(dstM);
+}
+
+uint64_t ExecuteStage::aluA(uint64_t icode, uint64_t valA, uint64_t valC) {
+    if (icode == IRRMOVQ || icode == IOPQ) {
+        return valA;
+    }
+    if (icode == IIRMOVQ || icode == IRMMOVQ || icode == IMRMOVQ) {
+        return valC;
+    }
+    if (icode == ICALL || icode == IPUSHQ) {
+        return -8;
+    }
+    if (icode == IRET || icode == IPOPQ) {
+        return 8;
+    }
+    return 0;
+}
+
+uint64_t ExecuteStage::aluB(uint64_t icode, uint64_t valB) {
+    if (icode == IRMMOVQ || icode == IMRMOVQ || icode == IOPQ || icode == ICALL
+        || icode == IPUSHQ || icode == IRET || icode == IPOPQ) {
+            return valB;
+    }
+    if (icode == IRRMOVQ || icode == IIRMOVQ) {
+        return 0;
+    }
+    return 0;
+}
+
+uint64_t ExecuteStage::alufun(uint64_t icode, uint64_t ifun) {
+    if (icode == IOPQ) {
+        return ifun;
+    }
+    return ADDQ;
+}
+
+bool ExecuteStage::set_cc(uint64_t icode) {
+    if (icode == IOPQ) {
+        return true;
+    }
+    return false;
+}
+
+uint64_t ExecuteStage::e_dstE(uint64_t icode, uint64_t dstE, uint64_t e_Cnd) {
+    if (icode == IRRMOVQ && !e_Cnd) {
+        return RNONE;
+    }
+    return dstE;
+}
+
+void ExecuteStage::CC(uint64_t icode) {
+    if (set_cc(icode)) {
+        ConditionCodes * codeInstance = ConditionCodes::getInstance();
+        //M * mreg = (M *) pregs[MREG];
+        //W * wreg = (W *) pregs[WREG];
+        //uint64_t W_stat = wreg->getstat()->getOutput();
+        //uint64_t m_stat = mreg-> getstat()->getOutput();
+        bool error;
+        codeInstance->setConditionCode(1, OF, error);
+        codeInstance->setConditionCode(1, ZF, error);
+        codeInstance->setConditionCode(1, SF, error);
+    }
 }
