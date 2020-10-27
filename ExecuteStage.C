@@ -34,14 +34,20 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     //D * dreg = (D *) pregs[DREG];
 
     uint64_t f_pc = freg->getpredPC()->getOutput();
-    uint64_t stat = ereg->getstat()->getOutput(), icode = ereg->geticode()->getOutput();
+    uint64_t stat = ereg->getstat()->getOutput();
+    uint64_t icode = ereg->geticode()->getOutput();
     
     uint64_t Cnd = 0;
-    uint64_t valE = ereg->getvalC()->getOutput();
+    uint64_t valC = ereg->getvalC()->getOutput();
     uint64_t valA = ereg->getvalA()->getOutput();
     uint64_t dstE = ereg->getdstE()->getOutput(), dstM = ereg->getdstM()->getOutput();
     uint64_t valB = ereg->getvalB()->getOutput();
+    uint64_t ifun = ereg->getifun()->getOutput();
+    uint64_t alufun1 = alufun(icode, ifun);
 
+
+    uint64_t valE = ALU(icode, ifun, aluA(icode, valA, valC), aluB(icode, valB));
+    //printf("valE: %X\n", valE);
     freg->getpredPC()->setInput(f_pc);
     ExecuteStage::setMInput(mreg, stat, icode, Cnd, valA, valE, dstE, dstM);
 
@@ -130,7 +136,7 @@ uint64_t ExecuteStage::e_dstE(uint64_t icode, uint64_t dstE, uint64_t e_Cnd) {
     return dstE;
 }
 
-void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2) {
+/*void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2) {
     if (set_cc(icode)) {
         ConditionCodes * codeInstance = ConditionCodes::getInstance();
         bool error;
@@ -195,24 +201,53 @@ void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2)
             }
         }
     }
-}
+}*/
 
 uint64_t ExecuteStage::ALU(uint64_t icode, uint64_t ifun, uint64_t aluA, uint64_t aluB) {
     uint64_t alufun1 = alufun(icode, ifun);
+    ConditionCodes * cc = ConditionCodes::getInstance();
+    bool of = false;
+    uint64_t sf = false;
+    uint64_t zf = false;
+    bool error;
     if (alufun1 == ADDQ) {
-        CC(icode, ifun, aluA, aluB);
+        //CC(icode, ifun, aluA, aluB);
+        of = Tools::addOverflow(aluA, aluB);
+        sf = Tools::sign((aluA + aluB));
+        if ((aluA + aluB) == 0)
+            zf = 1;
+        cc->setConditionCode(sf, SF, error);
+        cc->setConditionCode(zf, ZF, error);
+        cc->setConditionCode(of, OF, error); 
         return aluA + aluB;
     }
-    if (alufun1 == SUBQ) {
-        CC(icode, ifun, aluA, aluB);
+    else if (alufun1 == SUBQ) {
+        //CC(icode, ifun, aluA, aluB);
+        of = Tools::subOverflow(aluA, aluB);
+        sf = Tools::sign((aluA - aluB));
+        if ((aluA - aluB) == 0)
+            zf = 1;
+        cc->setConditionCode(sf, SF, error);
+        cc->setConditionCode(zf, ZF, error);
+        cc->setConditionCode(of, OF, error); 
         return aluA - aluB;
     }
-    if (alufun1 == XORQ) {
-        CC(icode, ifun, aluA, aluB);
+    else if (alufun1 == XORQ) {
+        //CC(icode, ifun, aluA, aluB);
+        sf = Tools::sign((aluA ^ aluB));
+        if ((aluA ^ aluB) == 0)
+            zf = 1;
+        cc->setConditionCode(sf, SF, error);
+        cc->setConditionCode(zf, ZF, error);
         return aluA ^ aluB;
     }
-    if (alufun1 == ANDQ) {
-        CC(icode, ifun, aluA, aluB);
+    else if (alufun1 == ANDQ) {
+        //CC(icode, ifun, aluA, aluB);
+        sf = Tools::sign((aluA & aluB));
+        if ((aluA & aluB) == 0)
+            zf = 1;
+        cc->setConditionCode(sf, SF, error);
+        cc->setConditionCode(zf, ZF, error);
         return aluA & aluB;
     }
     return 0;
