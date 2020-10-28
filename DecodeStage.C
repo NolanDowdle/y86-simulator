@@ -13,6 +13,7 @@
 #include "Status.h"
 #include "Debug.h"
 #include "Instructions.h"
+#include "ExecuteStage.h"
 
 /*
  * doClockLow:
@@ -37,8 +38,8 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t srcB = d_srcB(icode, dreg->getrB()->getOutput());
     uint64_t dstE = d_dstE(icode, dreg->getrB()->getOutput());
     uint64_t dstM = d_dstM(icode, dreg->getrA()->getOutput());
-    uint64_t valA = d_valA(dreg->getrA()->getOutput());
-    uint64_t valB = d_valB(dreg->getrB()->getOutput());
+    uint64_t valA = d_valA(icode, dreg->getrA()->getOutput(), pregs, stages);
+    uint64_t valB = d_valB(icode, dreg->getrB()->getOutput(), pregs, stages);
     DecodeStage::setEInput(ereg, stat, icode, ifun, valC, valA, valB, dstE, dstM, srcA, srcB);
     return false;
 }
@@ -122,14 +123,46 @@ uint64_t DecodeStage::d_dstM(uint64_t icode, uint64_t rA) {
     }
 }
 
-uint64_t DecodeStage::d_valA(uint64_t rA) {
+uint64_t DecodeStage::d_valA(uint64_t icode, uint64_t rA, PipeReg ** pregs, Stage ** stages) {
     RegisterFile * regInstance = RegisterFile::getInstance();
+    ExecuteStage * e = (ExecuteStage*) stages[ESTAGE];
+    M * mreg = (M *) pregs[MREG];
+    W * wreg = (W *) pregs[WREG];
     bool error;
+    uint64_t d_srcA1 = d_srcA(icode, rA);
+    uint64_t e_dstE1 = e->gete_dstE();
+    uint64_t M_dstE1 = mreg->getdstE()->getOutput();
+    uint64_t W_dstE1 = wreg->getdstE()->getOutput();
+    if (d_srcA1 == e_dstE1) {
+        return e->gete_valE();
+    }
+    if (d_srcA1 == M_dstE1) {
+        return mreg->getvalE()->getOutput();
+    }
+    if (d_srcA1 == W_dstE1) {
+        return wreg->getvalE()->getOutput();
+    }
     return regInstance->readRegister(rA, error);//value from register file
 }
 
-uint64_t DecodeStage::d_valB(uint64_t rB) {
+uint64_t DecodeStage::d_valB(uint64_t icode, uint64_t rB, PipeReg ** pregs, Stage ** stages) {
     RegisterFile * regInstance = RegisterFile::getInstance();
+    ExecuteStage * e = (ExecuteStage*) stages[ESTAGE];
+    M * mreg = (M *) pregs[MREG];
+    W * wreg = (W *) pregs[WREG];
     bool error;
+    uint64_t d_srcB1 = d_srcB(icode, rB);
+    uint64_t e_dstE1 = e->gete_dstE();
+    uint64_t M_dstE1 = mreg->getdstE()->getOutput();
+    uint64_t W_dstE1 = wreg->getdstE()->getOutput();
+    if (d_srcB1 == e_dstE1) {
+        return e->gete_valE();
+    }
+    if (d_srcB1 == M_dstE1) {
+        return mreg->getvalE()->getOutput();
+    }
+    if (d_srcB1 == W_dstE1) {
+        return wreg->getvalE()->getOutput();
+    }
     return regInstance->readRegister(rB, error);//value from register file
 }

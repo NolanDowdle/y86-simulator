@@ -30,7 +30,7 @@ WritebackStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h E.h St
 
 ExecuteStage.o: Tools.h Instructions.h ConditionCodes.h RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h E.h Stage.h FetchStage.h Status.h Debug.h
 
-DecodeStage.o: Instructions.h RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h E.h Stage.h FetchStage.h Status.h Debug.h
+DecodeStage.o: ExecuteStage.h Instructions.h RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h E.h Stage.h FetchStage.h Status.h Debug.h
 
 MemoryStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h E.h Stage.h FetchStage.h Status.h Debug.h
 

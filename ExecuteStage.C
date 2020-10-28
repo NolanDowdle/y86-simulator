@@ -36,14 +36,13 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t stat = ereg->getstat()->getOutput();
     uint64_t icode = ereg->geticode()->getOutput();
     uint64_t Cnd = 0;
-    //uint64_t valE = ereg->getvalC()->getOutput();
     uint64_t valA = ereg->getvalA()->getOutput();
-    uint64_t dstE = ereg->getdstE()->getOutput(); 
+    dstE = ereg->getdstE()->getOutput(); 
     uint64_t dstM = ereg->getdstM()->getOutput();
     uint64_t valB = ereg->getvalB()->getOutput();
     uint64_t valC = ereg-> getvalC()->getOutput();
     uint64_t ifun = ereg->getifun()->getOutput();
-    uint64_t valE = ALU(icode, ifun, aluA(icode, valA, valC), aluB(icode, valB));
+    valE = ALU(icode, ifun, aluA(icode, valA, valC), aluB(icode, valB));
 
     freg->getpredPC()->setInput(f_pc);
     ExecuteStage::setMInput(mreg, stat, icode, Cnd, valA, valE, dstE, dstM);
@@ -131,6 +130,16 @@ uint64_t ExecuteStage::e_dstE(uint64_t icode, uint64_t dstE, uint64_t e_Cnd) {
         return RNONE;
     }
     return dstE;
+}
+
+uint64_t ExecuteStage::gete_dstE()
+{
+    return dstE;
+}
+
+uint64_t ExecuteStage::gete_valE()
+{
+    return valE;
 }
 
 void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2) {
