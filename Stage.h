@@ -15,5 +15,3 @@ class Stage
       virtual bool doClockLow(PipeReg ** pregs, Stage ** stages) = 0;
       virtual void doClockHigh(PipeReg ** pregs) = 0;
 };
-
-
