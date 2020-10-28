@@ -138,14 +138,8 @@ void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2)
         ConditionCodes * codeInstance = ConditionCodes::getInstance();
         bool error;
         if(ifun == ADDQ) {
-            if (Tools::addOverflow(op1, op2)) {
-                codeInstance->setConditionCode(1, OF, error);
-            } else {
-                codeInstance->setConditionCode(0, OF, error);
-            }
-
-            //bool overFlowADDQ = Tools::addOverflow(op1, op2);
-            //codeInstance->setConditionCode(overFlowADDQ, OF, error);
+            bool overFlowADDQ = Tools::addOverflow(op1, op2);
+            codeInstance->setConditionCode(overFlowADDQ, OF, error);
 
             uint64_t signFlagADDQ = Tools::sign(op1 + op2);
             codeInstance->setConditionCode(signFlagADDQ, SF, error);
@@ -157,16 +151,13 @@ void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2)
             }
         }
         if (ifun == SUBQ) {
-            if (Tools::subOverflow(op1, op2)) {
-                codeInstance->setConditionCode(1, OF, error);
-            } else {
-                codeInstance->setConditionCode(0, OF, error);
-            }
+            bool overFlowSUBQ = Tools::subOverflow(op1, op2);
+            codeInstance->setConditionCode(overFlowSUBQ, OF, error);
 
-            uint64_t signFlagSUBQ = Tools::sign(op1 - op2);
+            uint64_t signFlagSUBQ = Tools::sign(op2 - op1);
             codeInstance->setConditionCode(signFlagSUBQ, SF, error);
 
-            if ((op1 - op2) == 0) {
+            if ((op2 - op1) == 0) {
                 codeInstance->setConditionCode(1, ZF, error);
             } else {
                 codeInstance->setConditionCode(0, ZF, error);
@@ -203,13 +194,11 @@ uint64_t ExecuteStage::ALU(uint64_t icode, uint64_t ifun, uint64_t aluA, uint64_
     uint64_t alufun1 = alufun(icode, ifun);
     if (alufun1 == ADDQ) {
         CC(icode, ifun, aluA, aluB);
-
         return aluA + aluB;
     }
     else if (alufun1 == SUBQ) {
         CC(icode, ifun, aluA, aluB);
- 
-        return aluA - aluB;
+        return aluB - aluA;
     }
     else if (alufun1 == XORQ) {
         CC(icode, ifun, aluA, aluB);

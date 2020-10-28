@@ -314,7 +314,10 @@ bool Tools::addOverflow(uint64_t op1, uint64_t op2)
     uint64_t a = sign(op1);
     uint64_t b = sign(op2);
     uint64_t c = sign(var);
-    return !(((a == 0) && (b == 0) && (c == 0)) || ((a == 1) && (b == 1) && (c == 1))); 
+    if ((a == 1 && b == 1 && c == 0) || (a == 0 && b == 0 && c == 1)) {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -344,10 +347,12 @@ bool Tools::subOverflow(uint64_t op1, uint64_t op2)
 {
    //Note: the result computed is op2 - op1 (not op1 - op2)
     uint64_t var = op2 - op1;
-    uint64_t a = sign(op1);
-    uint64_t b = sign(op2);
+    uint64_t a = sign(op2);
+    uint64_t b = sign(op1);
     uint64_t c = sign(var);
-    return !(((a == 0) && (b == 1) && (c == 1)) || ((a == 1) && (b == 0) && (c == 0)) 
-        || ((a == 0) && (b == 0) && (c == 1)) || ((a == 1) && (b == 1) && (c == 0))); 
+    if ((a == 0 && b == 1 && c == 1) || (a == 1 && b == 0 && c == 0)) {
+        return true;
+    } 
+    return false;
 }
 
