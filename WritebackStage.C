@@ -48,4 +48,5 @@ void WritebackStage::doClockHigh(PipeReg ** pregs)
     //printf("Register: %X\n", wreg->getdstE()->getOutput());
     //regInstance->writeRegister(0, 9, error);
     regInstance->writeRegister(wreg->getvalE()->getOutput(), wreg->getdstE()->getOutput(), error);
+    regInstance->writeRegister(wreg->getvalM()->getOutput(), wreg->getdstM()->getOutput(), error);
 }
