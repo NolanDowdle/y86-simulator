@@ -45,6 +45,7 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     valE = ALU(icode, ifun, aluA(icode, valA, valC), aluB(icode, valB));
 
     uint64_t e_Cnd = cond(icode, ifun);
+    dstE = e_dstE(icode, dstE, e_Cnd);
 
     freg->getpredPC()->setInput(f_pc);
     ExecuteStage::setMInput(mreg, stat, icode, e_Cnd, valA, valE, dstE, dstM);
