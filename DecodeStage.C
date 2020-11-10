@@ -130,6 +130,11 @@ uint64_t DecodeStage::d_valA(uint64_t icode, uint64_t rA, PipeReg ** pregs, Stag
     W * wreg = (W *) pregs[WREG];
     bool error;
     uint64_t d_srcA1 = d_srcA(icode, rA);
+
+    if (d_srcA1 == RNONE) {
+        return 0;
+    }
+
     uint64_t e_dstE1 = e->gete_dstE();
     uint64_t M_dstE1 = mreg->getdstE()->getOutput();
     uint64_t W_dstE1 = wreg->getdstE()->getOutput();
@@ -152,6 +157,11 @@ uint64_t DecodeStage::d_valB(uint64_t icode, uint64_t rB, PipeReg ** pregs, Stag
     W * wreg = (W *) pregs[WREG];
     bool error;
     uint64_t d_srcB1 = d_srcB(icode, rB);
+
+    if (d_srcB1 == RNONE) {
+        return 0;
+    }
+
     uint64_t e_dstE1 = e->gete_dstE();
     uint64_t M_dstE1 = mreg->getdstE()->getOutput();
     uint64_t W_dstE1 = wreg->getdstE()->getOutput();
