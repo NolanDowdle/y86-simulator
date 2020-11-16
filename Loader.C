@@ -163,7 +163,13 @@ bool Loader::hasErrors(std::string line) {
     }
 
     if(Loader::correctAddress(line) && Loader::hasEmptyData(line)) {
+        holdAddress = Loader::convert(line, ADDRBEGIN, ADDREND);
+        holdAddress -= 1;
         return false;
+    }
+
+    if(Loader::correctNext(line)) {
+        
     }
     //printf("NO ERRORS\n");
     return true;
@@ -244,6 +250,9 @@ bool Loader::correctNext(std::string line) {
     int32_t address = Loader::convert(line, ADDRBEGIN, ADDREND);
     int bytes = Loader::getByteNumbers(line);
     
+    //printf("%X\n", (holdAddress + holdBytes));
+    //printf("%X\n", address);
+
     if (holdAddress + holdBytes == address || holdAddress + holdBytes == 0) {
         holdAddress = address;
         holdBytes = bytes;
