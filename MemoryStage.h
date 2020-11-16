@@ -1,6 +1,8 @@
 class MemoryStage: public Stage
 {
     private:
+        uint64_t dstM;
+        uint64_t valM;
         void setWInput(W * wreg, uint64_t stat, uint64_t icode,
             uint64_t valM, uint64_t valE,
             uint64_t dstE, uint64_t dstM);
