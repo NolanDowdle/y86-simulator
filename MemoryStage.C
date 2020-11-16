@@ -108,3 +108,13 @@ bool MemoryStage::mem_write(uint64_t icode) {
     }
     return false;
 }
+
+uint64_t MemoryStage::get_dstM()
+{
+    return dstM;
+}
+
+uint64_t MemoryStage::get_valM()
+{
+    return valM;
+}

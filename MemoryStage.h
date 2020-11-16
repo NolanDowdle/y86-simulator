@@ -10,4 +10,6 @@ class MemoryStage: public Stage
         bool mem_write(uint64_t icode);
         bool mem_read(uint64_t icode);
         uint64_t mem_addr(uint64_t icode, uint64_t valA, uint64_t valE);
+        uint64_t get_dstM();
+        uint64_t get_valM();
 };
