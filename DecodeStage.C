@@ -88,7 +88,7 @@ void DecodeStage::setEInput(E * ereg, uint64_t stat, uint64_t icode,
 uint64_t DecodeStage::d_srcA(uint64_t icode, uint64_t rA) {
     if(icode == IRRMOVQ || icode == IRMMOVQ || icode == IOPQ || icode == IPUSHQ) {
         return rA;
-    } else if (icode == IOPQ || icode == IRET) {
+    } else if (icode == IPOPQ || icode == IRET) {
         return RSP;
     } else {
         return RNONE;
@@ -98,7 +98,7 @@ uint64_t DecodeStage::d_srcA(uint64_t icode, uint64_t rA) {
 uint64_t DecodeStage::d_srcB(uint64_t icode, uint64_t rB) {
     if(icode == IOPQ || icode == IMRMOVQ || icode == IRMMOVQ) {
         return rB;
-    } else if (icode == IOPQ || icode == IRET || icode == ICALL || icode == IPUSHQ) {
+    } else if (icode == IPOPQ || icode == IRET || icode == ICALL || icode == IPUSHQ) {
         return RSP;
     } else {
         return RNONE;
