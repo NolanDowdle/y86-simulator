@@ -162,15 +162,12 @@ bool Loader::hasErrors(std::string line) {
         return false;
     }
 
-    if(Loader::correctAddress(line) && Loader::hasEmptyData(line)) {
+    if(Loader::correctAddress(line) && Loader::hasEmptyData(line) && Loader::hasPipe(line)) {
         holdAddress = Loader::convert(line, ADDRBEGIN, ADDREND);
         holdAddress -= 1;
         return false;
     }
-
-    if(Loader::correctNext(line)) {
-        
-    }
+    
     //printf("NO ERRORS\n");
     return true;
 }
