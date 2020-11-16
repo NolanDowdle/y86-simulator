@@ -40,7 +40,7 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t addr = mem_addr(icode, valA, valE);
 
     Memory * m = Memory::getInstance();
-    bool error = false;
+    bool error;
     if (mem_read(icode)) {
         valM = m->getLong(addr, error);
     }
