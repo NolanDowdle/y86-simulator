@@ -161,6 +161,10 @@ bool Loader::hasErrors(std::string line) {
     {
         return false;
     }
+
+    if(Loader::correctAddress(line) && Loader::hasEmptyData(line)) {
+        return false;
+    }
     //printf("NO ERRORS\n");
     return true;
 }
@@ -305,3 +309,22 @@ bool Loader::noOverflow(std::string line) {
     //printf("NO OVERFLOW FAILS\n");  
     return false; 
 }
+/*
+int main() {
+    std::string fuckingwork = "0x138:                      |       .align 8";
+    bool ok = hasErrors(fuckingwork);
+    if (ok == false) {
+        if (correctAddress(fuckingwork) == true) {
+            if (correctData(fuckingwork) == true) {
+                //(fill the rest in for other methods)
+            } else {
+                //(fill the rest in for other methods)
+                printf("Maybe correctData");
+            }
+        } else {
+            printf("Maybe correctAddress?");
+        }
+    } else {
+        printf("Maybe hasErrors");
+    }
+}*/
