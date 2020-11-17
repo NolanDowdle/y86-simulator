@@ -168,7 +168,7 @@ uint64_t DecodeStage::d_valA(uint64_t icode, uint64_t rA, PipeReg ** pregs, Stag
         return wreg->getvalE()->getOutput();
     }
     //printf("rA: %X\n", egInstance->readRegister(rA, error))
-    return regInstance->readRegister(rA, error);//value from register file
+    return regInstance->readRegister(d_srcA1, error);//value from register file
 }
 
 uint64_t DecodeStage::d_valB(uint64_t icode, uint64_t rB, PipeReg ** pregs, Stage ** stages) {
@@ -210,5 +210,5 @@ uint64_t DecodeStage::d_valB(uint64_t icode, uint64_t rB, PipeReg ** pregs, Stag
         return wreg->getvalE()->getOutput();
     }
     //printf("rB: %X\n", regInstance->readRegister(rB, error))
-    return regInstance->readRegister(rB, error);//value from register file
+    return regInstance->readRegister(d_srcB1, error);//value from register file
 }
