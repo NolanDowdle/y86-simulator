@@ -47,6 +47,12 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    //rA, rB, and valC to be set.
    uint8_t ifun = Tools::getBits(word, 0, 3);
    uint8_t icode = Tools::getBits(word, 4, 7);
+
+   if (error) {
+      icode = INOP;
+      ifun = FNONE;
+   }
+
    //printf("icode: %X\n", icode);
    //printf("ifun: %X\n", ifun);
    //The lab assignment describes what methods need to be
@@ -211,3 +217,27 @@ uint64_t FetchStage::buildValC(uint64_t f_pc, bool needRegIds) {
    }
    return word;
 }
+
+bool FetchStage::instr_valid(uint64_t icode) {
+   if (icode == INOP || icode == IHALT || icode == IRRMOVQ 
+    || icode == IIRMOVQ || icode == IRMMOVQ || icode == IMRMOVQ 
+    || icode == IOPQ || icode == IJXX || icode == ICALL 
+    || icode == IRET || icode == IPUSHQ || icode == IPOPQ) {
+       return true;
+    }
+    return false;
+}
+
+uint64_t FetchStage::f_stat(uint64_t icode, bool mem_error, bool instr_valid) {
+   if (mem_error) {
+      return SADR;
+   }
+   if (!instr_valid) {
+      return SINS;
+   }
+   if (icode == IHALT) {
+      return SHLT;
+   }
+   return SAOK;
+}
+
