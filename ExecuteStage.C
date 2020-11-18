@@ -15,6 +15,7 @@
 #include "Instructions.h"
 #include "ConditionCodes.h"
 #include "Tools.h"
+#include "MemoryStage.h"
 
 
 /*
@@ -31,6 +32,7 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
     E * ereg = (E *) pregs[EREG];
+    W * wreg = (W *) pregs[WREG];
 
     uint64_t f_pc = freg->getpredPC()->getOutput();
     uint64_t stat = ereg->getstat()->getOutput();
@@ -42,7 +44,11 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t valB = ereg->getvalB()->getOutput();
     uint64_t valC = ereg-> getvalC()->getOutput();
     uint64_t ifun = ereg->getifun()->getOutput();
-    valE = ALU(icode, ifun, aluA(icode, valA, valC), aluB(icode, valB));
+
+    MemoryStage * m = (MemoryStage*) stages[MSTAGE];
+    uint64_t m_stat = m->get_stat();
+    uint64_t W_stat = wreg->getstat()->getOutput();
+    valE = ALU(icode, ifun, aluA(icode, valA, valC), aluB(icode, valB), m_stat, W_stat);
 
     uint64_t e_Cnd = cond(icode, ifun);
     dstE = e_dstE(icode, dstE, e_Cnd);
@@ -50,7 +56,37 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     freg->getpredPC()->setInput(f_pc);
     ExecuteStage::setMInput(mreg, stat, icode, e_Cnd, valA, valE, dstE, dstM);
 
+    M_bubble = calculateControlSignals(m_stat, W_stat);
+
     return false;
+}
+
+void ExecuteStage::bubbleM(PipeReg ** pregs) {
+    F * freg = (F *) pregs[FREG];
+    M * mreg = (M *) pregs[MREG];
+    
+    freg->getpredPC()->normal();
+    mreg->getstat()->bubble(SAOK);
+    mreg->geticode()->bubble(INOP);
+    mreg->getCnd()->bubble();
+    mreg->getvalE()->bubble();
+    mreg->getvalA()->bubble();
+    mreg->getdstE()->bubble(RNONE);
+    mreg->getdstM()->bubble(RNONE);
+}
+
+void ExecuteStage::normalM(PipeReg ** pregs) {
+    F * freg = (F *) pregs[FREG];
+    M * mreg = (M *) pregs[MREG];
+    
+    freg->getpredPC()->normal();
+    mreg->getstat()->normal();
+    mreg->geticode()->normal();
+    mreg->getCnd()->normal();
+    mreg->getvalE()->normal();
+    mreg->getvalA()->normal();
+    mreg->getdstE()->normal();
+    mreg->getdstM()->normal();
 }
 
 /* doClockHigh
@@ -61,17 +97,12 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
  */
 void ExecuteStage::doClockHigh(PipeReg ** pregs)
 {
-    F * freg = (F *) pregs[FREG];
-    M * mreg = (M *) pregs[MREG];
-
-    freg->getpredPC()->normal();
-    mreg->getstat()->normal();
-    mreg->geticode()->normal();
-    mreg->getCnd()->normal();
-    mreg->getvalE()->normal();
-    mreg->getvalA()->normal();
-    mreg->getdstE()->normal();
-    mreg->getdstM()->normal();
+    if (!M_bubble) {
+        normalM(pregs);
+    }
+    else {
+        bubbleM(pregs);
+    }
 }
 
 
@@ -121,8 +152,9 @@ uint64_t ExecuteStage::alufun(uint64_t icode, uint64_t ifun) {
     return ADDQ;
 }
 
-bool ExecuteStage::set_cc(uint64_t icode) {
-    if (icode == IOPQ) {
+bool ExecuteStage::set_cc(uint64_t icode, uint64_t m_stat, uint64_t W_stat) {
+    if (icode == IOPQ && m_stat != SADR && m_stat != SINS && m_stat != SHLT
+        && W_stat != SADR && W_stat != SINS && W_stat != SHLT) {
         return true;
     }
     return false;
@@ -145,8 +177,8 @@ uint64_t ExecuteStage::gete_valE()
     return valE;
 }
 
-void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2) {
-    if (set_cc(icode)) {
+void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2, uint64_t m_stat, uint64_t W_stat) {
+    if (set_cc(icode, m_stat, W_stat)) {
         ConditionCodes * codeInstance = ConditionCodes::getInstance();
         bool error;
         if(ifun == ADDQ) {
@@ -202,22 +234,22 @@ void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2)
     }
 }
 
-uint64_t ExecuteStage::ALU(uint64_t icode, uint64_t ifun, uint64_t aluA, uint64_t aluB) {
+uint64_t ExecuteStage::ALU(uint64_t icode, uint64_t ifun, uint64_t aluA, uint64_t aluB, uint64_t m_stat, uint64_t W_stat) {
     uint64_t alufun1 = alufun(icode, ifun);
     if (alufun1 == ADDQ) {
-        CC(icode, ifun, aluA, aluB);
+        CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluA + aluB;
     }
     else if (alufun1 == SUBQ) {
-        CC(icode, ifun, aluA, aluB);
+        CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluB - aluA;
     }
     else if (alufun1 == XORQ) {
-        CC(icode, ifun, aluA, aluB);
+        CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluA ^ aluB;
     }
     else if (alufun1 == ANDQ) {
-        CC(icode, ifun, aluA, aluB);
+        CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluA & aluB;
     }
     return 0;
@@ -247,4 +279,12 @@ uint64_t ExecuteStage::cond(uint64_t icode, uint64_t ifun) {
         }
     }
     return 0;
+}
+
+bool ExecuteStage::calculateControlSignals(uint64_t m_stat, uint64_t W_stat) {
+    if ((m_stat == SADR || m_stat == SINS || m_stat == SHLT)
+        || (W_stat == SADR || W_stat == SINS || W_stat == SHLT)) {
+        return true;
+    }
+    return false;
 }
