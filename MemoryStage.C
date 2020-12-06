@@ -123,7 +123,7 @@ uint64_t MemoryStage::get_valM()
     return valM;
 }
 
-uint64_t MemoryStage::get_stat()
+uint64_t MemoryStage::getm_stat()
 {
     return stat;
 }

@@ -37,7 +37,6 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t f_pc = freg->getpredPC()->getOutput();
     uint64_t stat = ereg->getstat()->getOutput();
     uint64_t icode = ereg->geticode()->getOutput();
-    //uint64_t Cnd = 0;
     uint64_t valA = ereg->getvalA()->getOutput();
     dstE = ereg->getdstE()->getOutput(); 
     uint64_t dstM = ereg->getdstM()->getOutput();
@@ -46,8 +45,9 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t ifun = ereg->getifun()->getOutput();
 
     MemoryStage * m = (MemoryStage*) stages[MSTAGE];
-    uint64_t m_stat = m->get_stat();
+    uint64_t m_stat = m->getm_stat();
     uint64_t W_stat = wreg->getstat()->getOutput();
+
     valE = ALU(icode, ifun, aluA(icode, valA, valC), aluB(icode, valB), m_stat, W_stat);
 
     uint64_t e_Cnd = cond(icode, ifun);
@@ -57,6 +57,8 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     ExecuteStage::setMInput(mreg, stat, icode, e_Cnd, valA, valE, dstE, dstM);
 
     M_bubble = calculateControlSignals(m_stat, W_stat);
+
+    //printf("%X%X\n", icode, ifun);
 
     return false;
 }
@@ -153,8 +155,8 @@ uint64_t ExecuteStage::alufun(uint64_t icode, uint64_t ifun) {
 }
 
 bool ExecuteStage::set_cc(uint64_t icode, uint64_t m_stat, uint64_t W_stat) {
-    if (icode == IOPQ && m_stat != SADR && m_stat != SINS && m_stat != SHLT
-        && W_stat != SADR && W_stat != SINS && W_stat != SHLT) {
+    if ((icode == IOPQ) && (m_stat != SADR && m_stat != SINS && m_stat != SHLT)
+        && (W_stat != SADR && W_stat != SINS && W_stat != SHLT)) {
         return true;
     }
     return false;

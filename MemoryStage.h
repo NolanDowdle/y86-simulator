@@ -15,5 +15,5 @@ class MemoryStage: public Stage
         uint64_t mem_addr(uint64_t icode, uint64_t valA, uint64_t valE);
         uint64_t get_dstM();
         uint64_t get_valM();
-        uint64_t get_stat();
+        uint64_t getm_stat();
 };
