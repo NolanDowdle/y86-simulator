@@ -247,11 +247,11 @@ uint64_t ExecuteStage::ALU(uint64_t icode, uint64_t ifun, uint64_t aluA, uint64_
         return aluB - aluA;
     }
     else if (alufun1 == XORQ) {
-        CC(icode, ifun, aluA, aluB, m_stat, W_stat);
+        //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluA ^ aluB;
     }
     else if (alufun1 == ANDQ) {
-        CC(icode, ifun, aluA, aluB, m_stat, W_stat);
+        //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluA & aluB;
     }
     return 0;
