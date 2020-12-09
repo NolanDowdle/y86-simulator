@@ -39,6 +39,7 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 
    //code missing here to select the value of the PC
    uint64_t f_pc = FetchStage::selectPC(freg, mreg, wreg);
+   //printf("predPC: %X\nicode: %X\nifun: %X\n", f_pc, icode, ifun);
    //and fetch the instruction from memory
    Memory * memInstance = Memory::getInstance();
    bool error;
@@ -54,6 +55,8 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
       icode = INOP;
       ifun = FNONE;
    }
+
+   //printf("predPC: %X\nicode: %X\nifun: %X\n", f_pc, icode, ifun);
 
    //printf("icode: %X\n", icode);
    //printf("ifun: %X\n", ifun);
@@ -180,8 +183,10 @@ uint64_t FetchStage::selectPC(F * freg, M * mreg, W * wreg) {
       return m_valA;
    }
    if (w_icode == IRET) {
+      //printf("Enters the w_icode == IRET block");
       return w_valM;
    }
+   //printf("After the w_icode == IRET block, predPC = %X\nw_valM = %X\n", f_predPC, w_icode);
    return f_predPC;
 }
 
@@ -203,8 +208,9 @@ bool FetchStage::needValC(uint64_t f_icode) {
 uint64_t FetchStage::predictPC(uint64_t f_icode, uint64_t f_valC, uint64_t f_valP) {
    if (f_icode == IJXX || f_icode == ICALL) {
       return f_valC;
+   } else {
+      return f_valP;
    }
-   return f_valP;
 }
 
 uint64_t FetchStage::PCincrement(uint64_t f_pc, bool needRegIds, bool needValC) {
