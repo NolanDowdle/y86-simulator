@@ -26,7 +26,7 @@
  */
 bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
-    F * freg = (F *) pregs[FREG];
+    //F * freg = (F *) pregs[FREG];
     W * wreg = (W *) pregs[WREG];
     M * mreg = (M *) pregs[MREG];
 
@@ -36,7 +36,7 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t valE = mreg->getvalE()->getOutput();
     uint64_t dstE = mreg->getdstE()->getOutput(); 
     dstM = mreg->getdstM()->getOutput();
-    uint64_t f_pc = freg->getpredPC()->getOutput();
+    //uint64_t f_pc = freg->getpredPC()->getOutput();
 
     uint64_t valA = mreg->getvalA()->getOutput();
     uint64_t addr = mem_addr(icode, valA, valE);

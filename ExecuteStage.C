@@ -29,12 +29,12 @@
  */
 bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
-    F * freg = (F *) pregs[FREG];
+    //F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
     E * ereg = (E *) pregs[EREG];
     W * wreg = (W *) pregs[WREG];
 
-    uint64_t f_pc = freg->getpredPC()->getOutput();
+    //uint64_t f_pc = freg->getpredPC()->getOutput();
     uint64_t stat = ereg->getstat()->getOutput();
     uint64_t icode = ereg->geticode()->getOutput();
     uint64_t valA = ereg->getvalA()->getOutput();

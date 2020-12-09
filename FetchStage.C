@@ -104,7 +104,6 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
  */
 void FetchStage::doClockHigh(PipeReg ** pregs) {
    F * freg = (F *) pregs[FREG];
-   D * dreg = (D *) pregs[DREG];
    
    if (!F_stall_var) {
       freg->getpredPC()->normal();
