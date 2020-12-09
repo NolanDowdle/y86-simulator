@@ -41,6 +41,14 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t dstM = d_dstM(icode, dreg->getrA()->getOutput());
     uint64_t valA = d_valA(icode, dreg->getrA()->getOutput(), pregs, stages);
     uint64_t valB = d_valB(icode, dreg->getrB()->getOutput(), pregs, stages);
+
+    d_srcA_var = d_srcA(icode, srcA);
+    d_srcB_var = d_srcB(icode, srcB);
+    uint64_t E_icode = ereg->geticode()->getOutput();
+    uint64_t E_dstM = ereg->getdstM()->getOutput();
+
+    calculateControlSignals(E_icode, E_dstM, d_srcA_var, d_srcB_var);
+
     DecodeStage::setEInput(ereg, stat, icode, ifun, valC, valA, valB, dstE, dstM, srcA, srcB);
     return false;
 }
@@ -54,10 +62,20 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 void DecodeStage::doClockHigh(PipeReg ** pregs)
 {
     F * freg = (F *) pregs[FREG];
-    //D * dreg = (D *) pregs[DREG];
-    E * ereg = (E *) pregs[EREG];
 
     freg->getpredPC()->normal();
+    
+    if (E_bubble_var) {
+        bubbleE(pregs);
+    }
+    else {
+        normalE(pregs);
+    }
+}
+
+void DecodeStage::normalE(PipeReg ** pregs) {
+    E * ereg = (E *) pregs[EREG];
+
     ereg->getstat()->normal();
     ereg->geticode()->normal();
     ereg->getifun()->normal();
@@ -68,6 +86,21 @@ void DecodeStage::doClockHigh(PipeReg ** pregs)
     ereg->getdstM()->normal();
     ereg->getsrcA()->normal();
     ereg->getsrcB()->normal();
+}
+
+void DecodeStage::bubbleE(PipeReg ** pregs) {
+    E * ereg = (E *) pregs[EREG];
+
+    ereg->getstat()->bubble(SAOK);
+    ereg->geticode()->bubble(INOP);
+    ereg->getifun()->bubble();
+    ereg->getvalC()->bubble();
+    ereg->getvalA()->bubble();
+    ereg->getvalB()->bubble();
+    ereg->getdstE()->bubble(RNONE);
+    ereg->getdstM()->bubble(RNONE);
+    ereg->getsrcA()->bubble(RNONE);
+    ereg->getsrcB()->bubble(RNONE); 
 }
 
 void DecodeStage::setEInput(E * ereg, uint64_t stat, uint64_t icode,
@@ -211,4 +244,19 @@ uint64_t DecodeStage::d_valB(uint64_t icode, uint64_t rB, PipeReg ** pregs, Stag
     }
     //printf("rB: %X\n", regInstance->readRegister(rB, error))
     return regInstance->readRegister(d_srcB1, error);//value from register file
+}
+
+uint64_t DecodeStage::getd_srcA() {
+    return d_srcA_var;
+}
+
+uint64_t DecodeStage::getd_srcB() {
+    return d_srcB_var;
+}
+
+bool DecodeStage::calculateControlSignals(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB) {
+    if ((E_icode == IMRMOVQ || E_icode == IPOPQ) && (E_dstM == d_srcA || E_dstM == d_srcB)) {
+        return true;
+    }
+    return false;
 }

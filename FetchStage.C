@@ -15,6 +15,8 @@
 #include "Memory.h"
 #include "Tools.h"
 #include "Instructions.h"
+#include "ExecuteStage.h"
+#include "DecodeStage.h"
 
 
 /*
@@ -86,6 +88,8 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 
    freg->getpredPC()->setInput(FetchStage::predictPC(icode, valC, valP));
 
+   calculateControlSignals(pregs, stages);
+
    //provide the input values for the D register
    setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
    return false;
@@ -101,15 +105,19 @@ void FetchStage::doClockHigh(PipeReg ** pregs)
 {
    F * freg = (F *) pregs[FREG];
    D * dreg = (D *) pregs[DREG];
-
-   freg->getpredPC()->normal();
-   dreg->getstat()->normal();
-   dreg->geticode()->normal();
-   dreg->getifun()->normal();
-   dreg->getrA()->normal();
-   dreg->getrB()->normal();
-   dreg->getvalC()->normal();
-   dreg->getvalP()->normal();
+   
+   if (!F_stall_var) {
+      freg->getpredPC()->normal();
+   }
+   if (!D_stall_var) {
+      dreg->getstat()->normal();
+      dreg->geticode()->normal();
+      dreg->getifun()->normal();
+      dreg->getrA()->normal();
+      dreg->getrB()->normal();
+      dreg->getvalC()->normal();
+      dreg->getvalP()->normal();
+   }
 }
 
 /* setDInput
@@ -247,3 +255,30 @@ uint64_t FetchStage::f_stat(uint64_t icode, bool mem_error, bool instr_valid) {
    return SAOK;
 }
 
+bool FetchStage::F_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB) {
+   if ((E_icode == IMRMOVQ || E_icode == IPOPQ) && (E_dstM == d_srcA || E_dstM == d_srcB)) {
+      return true;
+   }
+   return false;
+}
+
+bool FetchStage::D_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB) {
+   if ((E_icode == IMRMOVQ || E_icode == IPOPQ) && (E_dstM == d_srcA || E_dstM == d_srcB)) {
+      return true;
+   }
+   return false;
+}
+
+void FetchStage::calculateControlSignals(PipeReg ** pregs, Stage ** stages) {
+   //ExecuteStage * es = (ExecuteStage *) stages[ESTAGE];
+   DecodeStage * ds = (DecodeStage *) stages[DSTAGE];
+   E * ereg = (E *) pregs[EREG];
+
+   uint64_t E_icode = ereg->geticode()->getOutput();
+   uint64_t E_dstM = ereg->getdstM()->getOutput();
+   uint64_t d_srcA = ds->getd_srcA();
+   uint64_t d_srcB = ds->getd_srcB();
+
+   F_stall_var = F_stall(E_icode, E_dstM, d_srcA, d_srcB);
+   D_stall_var = D_stall(E_icode, E_dstM, d_srcA, d_srcB);
+}
