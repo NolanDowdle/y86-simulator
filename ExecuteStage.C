@@ -69,7 +69,7 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 	}
 
 
-    uint64_t e_Cnd = cond(icode, ifun);
+    e_Cnd = cond(icode, ifun);
     dstE = e_dstE(icode, dstE, e_Cnd);
 
     //freg->getpredPC()->setInput(f_pc);
@@ -108,6 +108,11 @@ void ExecuteStage::normalM(PipeReg ** pregs) {
     mreg->getvalA()->normal();
     mreg->getdstE()->normal();
     mreg->getdstM()->normal();
+}
+
+uint64_t ExecuteStage::gete_Cnd()
+{
+    return e_Cnd;
 }
 
 /* doClockHigh
