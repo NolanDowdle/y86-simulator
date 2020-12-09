@@ -48,12 +48,31 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t m_stat = m->getm_stat();
     uint64_t W_stat = wreg->getstat()->getOutput();
 
-    valE = ALU(icode, ifun, aluA(icode, valA, valC), aluB(icode, valB), m_stat, W_stat);
+	bool of = false;
+
+    valE = ALU(icode, ifun, aluA(icode, valA, valC), aluB(icode, valB), m_stat, W_stat, & of);
+
+	bool error = false;
+	uint64_t sign = Tools::sign(valE);
+	uint64_t zf = 0;
+	if(valE == 0) {
+		zf = 1;
+	}
+
+	bool changeCC = set_cc(icode, m_stat, W_stat);
+
+	if(changeCC) {
+		ConditionCodes * cceditor = ConditionCodes::getInstance();
+		cceditor->setConditionCode(sign, SF, error);
+		cceditor->setConditionCode(zf, ZF, error);
+		cceditor->setConditionCode(of, OF, error); 
+	}
+
 
     uint64_t e_Cnd = cond(icode, ifun);
     dstE = e_dstE(icode, dstE, e_Cnd);
 
-    freg->getpredPC()->setInput(f_pc);
+    //freg->getpredPC()->setInput(f_pc);
     ExecuteStage::setMInput(mreg, stat, icode, e_Cnd, valA, valE, dstE, dstM);
 
     M_bubble = calculateControlSignals(m_stat, W_stat);
@@ -209,52 +228,30 @@ void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2,
                 codeInstance->setConditionCode(0, ZF, error);
             }
         }
-        if (ifun == XORQ) {
-            codeInstance->setConditionCode(0, OF, error);
-
-            uint64_t signFlagXORQ = Tools::sign(op1 ^ op2);
-            codeInstance->setConditionCode(signFlagXORQ, SF, error);
-
-            if ((op1 ^ op2) == 0) {
-                codeInstance->setConditionCode(1, ZF, error);
-            } else {
-                codeInstance->setConditionCode(0, ZF, error);
-            }
-        }
-        if (ifun == ANDQ) {
-            codeInstance->setConditionCode(0, OF, error);
-
-            uint64_t signFlagANDQ = Tools::sign(op1 & op2);
-            codeInstance->setConditionCode(signFlagANDQ, SF, error);
-
-            if ((op1 & op2) == 0) {
-                codeInstance->setConditionCode(1, ZF, error);
-            } else {
-                codeInstance->setConditionCode(0, ZF, error);
-            }
-        }
     }
 }
 
-uint64_t ExecuteStage::ALU(uint64_t icode, uint64_t ifun, uint64_t aluA, uint64_t aluB, uint64_t m_stat, uint64_t W_stat) {
+uint64_t ExecuteStage::ALU(uint64_t icode, uint64_t ifun, uint64_t aluA, uint64_t aluB, uint64_t m_stat, uint64_t W_stat, bool * of) {
     uint64_t alufun1 = alufun(icode, ifun);
     if (alufun1 == ADDQ) {
-        CC(icode, ifun, aluA, aluB, m_stat, W_stat);
+        //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
+	*of = Tools::addOverflow(aluA, aluB);
         return aluA + aluB;
     }
     else if (alufun1 == SUBQ) {
-        CC(icode, ifun, aluA, aluB, m_stat, W_stat);
+        //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
+	*of = Tools::subOverflow(aluA, aluB);
         return aluB - aluA;
     }
     else if (alufun1 == XORQ) {
         //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluA ^ aluB;
     }
-    else if (alufun1 == ANDQ) {
+    else {
         //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluA & aluB;
     }
-    return 0;
+    //return 0;
 }
 
 uint64_t ExecuteStage::cond(uint64_t icode, uint64_t ifun) {

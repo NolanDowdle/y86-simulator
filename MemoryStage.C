@@ -55,7 +55,7 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
         stat = SADR;
     }
 
-    freg->getpredPC()->setInput(f_pc);
+    //freg->getpredPC()->setInput(f_pc);
     MemoryStage::setWInput(wreg, stat, icode, valM, valE, dstE, dstM);
     return false;
 }
