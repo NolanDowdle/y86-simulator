@@ -67,7 +67,7 @@ void DecodeStage::doClockHigh(PipeReg ** pregs)
 {
     F * freg = (F *) pregs[FREG];
 
-    freg->getpredPC()->normal();
+    //freg->getpredPC()->normal();
     
     if (E_bubble_var) {
         bubbleE(pregs);

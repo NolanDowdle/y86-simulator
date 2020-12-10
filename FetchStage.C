@@ -314,7 +314,7 @@ void FetchStage::calculateControlSignals(PipeReg ** pregs, Stage ** stages) {
    uint64_t d_srcB = ds->getd_srcB();
    uint64_t e_Cnd = es->gete_Cnd();
 
-   F_stall_var = F_stall( D_icode, M_icode, E_icode, E_dstM, d_srcA, d_srcB);
+   F_stall_var = F_stall(D_icode, M_icode, E_icode, E_dstM, d_srcA, d_srcB);
    D_stall_var = D_stall(E_icode, E_dstM, d_srcA, d_srcB);
    D_bubble_var = D_bubble(D_icode, M_icode, E_icode, e_Cnd, d_srcA, d_srcB, E_dstM);
 }

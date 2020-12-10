@@ -71,7 +71,7 @@ void MemoryStage::doClockHigh(PipeReg ** pregs)
     F * freg = (F *) pregs[FREG];
     W * wreg = (W *) pregs[WREG];
 
-    freg->getpredPC()->normal();
+    //freg->getpredPC()->normal();
     wreg->getstat()->normal();
     wreg->geticode()->normal();
     wreg->getvalE()->normal();

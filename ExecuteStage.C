@@ -86,7 +86,7 @@ void ExecuteStage::bubbleM(PipeReg ** pregs) {
     F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
     
-    freg->getpredPC()->normal();
+    //freg->getpredPC()->normal();
     mreg->getstat()->bubble(SAOK);
     mreg->geticode()->bubble(INOP);
     mreg->getCnd()->bubble();
@@ -100,7 +100,7 @@ void ExecuteStage::normalM(PipeReg ** pregs) {
     F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
     
-    freg->getpredPC()->normal();
+    //freg->getpredPC()->normal();
     mreg->getstat()->normal();
     mreg->geticode()->normal();
     mreg->getCnd()->normal();
