@@ -26,7 +26,6 @@
  */
 bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
-    //F * freg = (F *) pregs[FREG];
     W * wreg = (W *) pregs[WREG];
     M * mreg = (M *) pregs[MREG];
 
@@ -36,7 +35,6 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     uint64_t valE = mreg->getvalE()->getOutput();
     uint64_t dstE = mreg->getdstE()->getOutput(); 
     dstM = mreg->getdstM()->getOutput();
-    //uint64_t f_pc = freg->getpredPC()->getOutput();
 
     uint64_t valA = mreg->getvalA()->getOutput();
     uint64_t addr = mem_addr(icode, valA, valE);
@@ -54,8 +52,6 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     if(error) {
         stat = SADR;
     }
-
-    //freg->getpredPC()->setInput(f_pc);
     MemoryStage::setWInput(wreg, stat, icode, valM, valE, dstE, dstM);
     return false;
 }
@@ -70,8 +66,6 @@ void MemoryStage::doClockHigh(PipeReg ** pregs)
 {
     F * freg = (F *) pregs[FREG];
     W * wreg = (W *) pregs[WREG];
-
-    //freg->getpredPC()->normal();
     wreg->getstat()->normal();
     wreg->geticode()->normal();
     wreg->getvalE()->normal();
@@ -80,6 +74,9 @@ void MemoryStage::doClockHigh(PipeReg ** pregs)
     wreg->getdstM()->normal();
 }
 
+/*
+sets the input to the writeback stage register
+*/
 void MemoryStage::setWInput(W * wreg, uint64_t stat, uint64_t icode,
     uint64_t valM, uint64_t valE, uint64_t dstE, uint64_t dstM) {
     wreg->getstat()->setInput(stat);
@@ -90,6 +87,9 @@ void MemoryStage::setWInput(W * wreg, uint64_t stat, uint64_t icode,
     wreg->getdstM()->setInput(dstM);
 }
 
+/*
+tells us where to get the memory address from based on the instruction
+*/
 uint64_t MemoryStage::mem_addr(uint64_t icode, uint64_t valA, uint64_t valE) {
     
     if(icode == IRMMOVQ || icode == IPUSHQ || icode == ICALL || icode == IMRMOVQ) {
@@ -100,6 +100,10 @@ uint64_t MemoryStage::mem_addr(uint64_t icode, uint64_t valA, uint64_t valE) {
     return 0;
 }
 
+
+/*
+true if instruction is reading from memory, false otherwise
+*/
 bool MemoryStage::mem_read(uint64_t icode) {
     if (icode == IMRMOVQ || icode == IPOPQ || icode == IRET) {
         return true;
@@ -107,6 +111,9 @@ bool MemoryStage::mem_read(uint64_t icode) {
     return false;
 }
 
+/*
+true if instruction writes to memory, false otherwise
+*/
 bool MemoryStage::mem_write(uint64_t icode) {
     if (icode == IRMMOVQ || icode == IPUSHQ || icode == ICALL) {
         return true;
@@ -114,16 +121,25 @@ bool MemoryStage::mem_write(uint64_t icode) {
     return false;
 }
 
+/*
+getter for memory stages dstM
+*/
 uint64_t MemoryStage::get_dstM()
 {
     return dstM;
 }
 
+/*
+getter for memory stages valM
+*/
 uint64_t MemoryStage::get_valM()
 {
     return valM;
 }
 
+/*
+getter for memory stages stat
+*/
 uint64_t MemoryStage::getm_stat()
 {
     return stat;

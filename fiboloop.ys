@@ -1,0 +1,27 @@
+          .pos 0
+main:     irmovq stack, %rsp
+          #initialize %rdi to the number of
+          #fibonacci numbers to compute
+          irmovq $20, %rdi
+          #initialize %rsi to the address
+          #of where to store the numbers
+          irmovq fibolst, %rsi
+          call fibo
+          halt
+# fibo 
+# Computes fibonacci numbers
+# param: %rdi - contains a count of the 
+#        number of fibonacci numbers to 
+#        compute
+# param: %rsi - contains the starting 
+#        address in memory of where to
+#        store the numbers
+#
+fibo:     #put your code here  
+        
+done:     ret
+#
+          .align 8
+fibolst:  .quad 0 
+          .pos 0x400 
+stack:    

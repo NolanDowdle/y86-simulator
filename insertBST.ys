@@ -1,0 +1,51 @@
+# This program calls an insertBST function twice to insert two
+# nodes into an existing binary search tree.
+# The parameters to minBST are in %rdi and %rsi. 
+# %rdi contains the address of the root node. %rsi contains the
+# address of a node to insert.  A node contains three 8-byte
+# fields: address of left node, address of right node, value of
+# node.
+#
+# This program isn't for the faint-hearted.
+# 
+       .pos 0
+       irmovq stack, %rsp
+       irmovq node0, %rdi  #address of root node
+       irmovq newN1, %rsi  #address of node to insert
+       call insertBST
+       irmovq node0, %rdi  #address of root node
+       irmovq newN2, %rsi  #address of node to insert
+       call insertBST
+       halt   
+#
+insertBST: #address of root node is in %rdi
+           #address of node to insert is in %rsi 
+done:  ret
+#
+       .pos 0x200
+node0: .quad node1    #address of left child
+       .quad node2    #address of right child
+       .quad 10       #value in the node
+node1: .quad node3
+       .quad 0 #should be modified to be newNd1 (0x290)
+       .quad 4        
+node2: .quad node4
+       .quad node5
+       .quad 15
+node3: .quad 0
+       .quad 0
+       .quad 2       
+node4: .quad 0  #should be modified to be newNd2 (0x2a8)
+       .quad 0
+       .quad 12
+node5: .quad 0
+       .quad 0
+       .quad 20
+newN1: .quad 0
+       .quad 0
+       .quad 5
+newN2: .quad 0
+       .quad 0
+       .quad 11
+       .pos 0x400
+stack: .quad 0

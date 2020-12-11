@@ -1,0 +1,36 @@
+# This program calls a minBST function that returns the minimum value
+# in a binary search tree.  The parameter to minBST is in %rdi. 
+# %rdi contains the address of the root node. The return value is
+# stored in %rax. A node consists of three 8-byte fields: address
+# of left child, address of right child, value of node.
+       .pos 0
+       irmovq stack, %rsp
+       irmovq node0, %rdi
+       irmovq 0, %rax 
+       call minBST
+       halt   
+minBST: #address of root node is in %rdi
+        #returns the minimum value in the tree in register %rax
+done:  ret
+#
+       .align 8
+node0: .quad node1    #address of left child
+       .quad node2    #address of right child
+       .quad 10       #value in the node
+node1: .quad node3
+       .quad 0
+       .quad 4        
+node2: .quad node4
+       .quad node5
+       .quad 12
+node3: .quad 0
+       .quad 0
+       .quad 2        #here is the minimum value
+node4: .quad 0
+       .quad 0
+       .quad 11
+node5: .quad 0
+       .quad 0
+       .quad 15
+       .pos 0x200
+stack: .quad 0

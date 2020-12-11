@@ -1,0 +1,24 @@
+         .pos 0
+         irmovq stack, %rsp
+         irmovq list, %rdi
+         call addList
+         halt
+#
+# addList: sum the elements of a NULL terminated list
+# parameter: %rdi contains the value list, which
+#            is the adress of the first element in the list
+# return: %rax contains the sum
+addList: 
+         ret  
+         .align 8
+list:    .quad 2
+         .quad 5
+         .quad -1 
+         .quad 1
+         .quad 2
+         .quad 4
+         .quad 5
+         .quad 0  #indicates the end of the list
+#
+         .pos 0x200
+stack:

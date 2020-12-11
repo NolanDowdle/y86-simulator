@@ -36,18 +36,10 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    W * wreg = (W *) pregs[WREG];
    uint64_t valC = 0;
    uint64_t rA = RNONE, rB = RNONE, stat = SAOK;
-
-   //code missing here to select the value of the PC
    uint64_t f_pc = FetchStage::selectPC(freg, mreg, wreg);
-   //printf("predPC: %X\nicode: %X\nifun: %X\n", f_pc, icode, ifun);
-   //and fetch the instruction from memory
    Memory * memInstance = Memory::getInstance();
    bool error;
    uint8_t word = memInstance->getByte(f_pc, error);
-   //printf("Word: %X\n", word);
-   //printf("Address: %X\n", f_pc);
-   //Fetching the instruction will allow the icode, ifun,
-   //rA, rB, and valC to be set.
    uint8_t ifun = Tools::getBits(word, 0, 3);
    uint8_t icode = Tools::getBits(word, 4, 7);
 
@@ -56,17 +48,9 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
       ifun = FNONE;
    }
 
-   //printf("predPC: %X\nicode: %X\nifun: %X\n", f_pc, icode, ifun);
-
-   //printf("icode: %X\n", icode);
-   //printf("ifun: %X\n", ifun);
-   //The lab assignment describes what methods need to be
-   //written.
-
    bool needRegIds = FetchStage::needRegIds(icode);
    bool needValC = FetchStage::needValC(icode);
 
-   //The value passed to setInput below will need to be changed
    uint64_t valP = FetchStage::PCincrement(f_pc, needRegIds, needValC);
 
    if (needRegIds == true) {
@@ -89,12 +73,10 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    bool instrValid = instr_valid(icode);
    stat = f_stat(icode, error, instrValid);
 
-   //calculateControlSignals(pregs, stages);
    freg->getpredPC()->setInput(FetchStage::predictPC(icode, valC, valP));
 
    calculateControlSignals(pregs, stages);
 
-   //provide the input values for the D register
    setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
    return false;
 }
@@ -120,6 +102,9 @@ void FetchStage::doClockHigh(PipeReg ** pregs) {
    }
 }
 
+/*
+makes the D register normal
+*/
 void FetchStage::normalD(PipeReg ** pregs) {
     D * dreg = (D *) pregs[DREG];
 
@@ -133,6 +118,9 @@ void FetchStage::normalD(PipeReg ** pregs) {
 
 }
 
+/*
+bubbles the D register
+*/
 void FetchStage::bubbleD(PipeReg ** pregs) {
     D * dreg = (D *) pregs[DREG];
 
@@ -172,6 +160,8 @@ void FetchStage::setDInput(D * dreg, uint64_t stat, uint64_t icode,
    dreg->getvalP()->setInput(valP);
 }
      
+/* Implements the logic for selecting a PC
+*/
 uint64_t FetchStage::selectPC(F * freg, M * mreg, W * wreg) {
    uint64_t f_predPC = freg->getpredPC()->getOutput();
    uint64_t m_Cnd = mreg->getCnd()->getOutput();
@@ -183,13 +173,14 @@ uint64_t FetchStage::selectPC(F * freg, M * mreg, W * wreg) {
       return m_valA;
    }
    if (w_icode == IRET) {
-      //printf("Enters the w_icode == IRET block");
       return w_valM;
    }
-   //printf("After the w_icode == IRET block, predPC = %X\nw_valM = %X\n", f_predPC, w_icode);
    return f_predPC;
 }
 
+/*
+Returns a boolean for if we need register ids for the current instruction
+*/
 bool FetchStage::needRegIds(uint64_t f_icode) {
    if (f_icode == IRRMOVQ || f_icode == IOPQ || f_icode == IPUSHQ || f_icode == IPOPQ
       || f_icode == IIRMOVQ || f_icode == IRMMOVQ || f_icode == IMRMOVQ) {
@@ -197,7 +188,9 @@ bool FetchStage::needRegIds(uint64_t f_icode) {
    }
    return false;
 }
-
+/*
+Returns a boolean if we need valC or not
+*/
 bool FetchStage::needValC(uint64_t f_icode) {
    if (f_icode == IIRMOVQ || f_icode == IRMMOVQ || f_icode == IMRMOVQ || f_icode == IJXX || f_icode == ICALL) {
       return true;
@@ -205,6 +198,9 @@ bool FetchStage::needValC(uint64_t f_icode) {
    return false;
 }
 
+/*
+implements the logic for selecting the correct Program Counter (PC)
+*/
 uint64_t FetchStage::predictPC(uint64_t f_icode, uint64_t f_valC, uint64_t f_valP) {
    if (f_icode == IJXX || f_icode == ICALL) {
       return f_valC;
@@ -213,6 +209,9 @@ uint64_t FetchStage::predictPC(uint64_t f_icode, uint64_t f_valC, uint64_t f_val
    }
 }
 
+/*
+inplements the logic for incrementing the Program Counter (PC)
+*/
 uint64_t FetchStage::PCincrement(uint64_t f_pc, bool needRegIds, bool needValC) {
    if (needValC) {
       if(needRegIds) {
@@ -227,6 +226,9 @@ uint64_t FetchStage::PCincrement(uint64_t f_pc, bool needRegIds, bool needValC) 
    return f_pc + 1;
 }
 
+/*
+Implements the logic to get the register Ids from the current instruction
+*/
 void FetchStage::getRegIds(uint64_t &rA, uint64_t &rB, uint64_t f_pc) {
    Memory * memInstance = Memory::getInstance();
    bool error = false;
@@ -238,6 +240,9 @@ void FetchStage::getRegIds(uint64_t &rA, uint64_t &rB, uint64_t f_pc) {
    rB = rB & 0x0F;  
 }
 
+/*
+builds the valC from the current instruction
+*/
 uint64_t FetchStage::buildValC(uint64_t f_pc, bool needRegIds) {
    Memory * memInstance = Memory::getInstance();
    uint64_t word = 0;
@@ -261,6 +266,9 @@ uint64_t FetchStage::buildValC(uint64_t f_pc, bool needRegIds) {
    return word;
 }
 
+/*
+checks if icode is a valid istruction
+*/
 bool FetchStage::instr_valid(uint64_t icode) {
    if (icode == INOP || icode == IHALT || icode == IRRMOVQ 
     || icode == IIRMOVQ || icode == IRMMOVQ || icode == IMRMOVQ 
@@ -271,6 +279,9 @@ bool FetchStage::instr_valid(uint64_t icode) {
     return false;
 }
 
+/*
+determines the fetch stat
+*/
 uint64_t FetchStage::f_stat(uint64_t icode, bool mem_error, bool instr_valid) {
    if (mem_error) {
       return SADR;
@@ -284,6 +295,9 @@ uint64_t FetchStage::f_stat(uint64_t icode, bool mem_error, bool instr_valid) {
    return SAOK;
 }
 
+/*
+determines if we need to stall the fetch register
+*/
 bool FetchStage::F_stall(uint64_t D_icode, uint64_t M_icode, uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB) {
    if (((E_icode == IMRMOVQ || E_icode == IPOPQ) && (E_dstM == d_srcA || E_dstM == d_srcB)) ||
       (D_icode == IRET || E_icode == IRET || M_icode == IRET)) {
@@ -292,6 +306,9 @@ bool FetchStage::F_stall(uint64_t D_icode, uint64_t M_icode, uint64_t E_icode, u
    return false;
 }
 
+/*
+determines if we need to stall the decode register
+*/
 bool FetchStage::D_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB) {
    if ((E_icode == IMRMOVQ || E_icode == IPOPQ) && (E_dstM == d_srcA || E_dstM == d_srcB)) {
       return true;
@@ -299,6 +316,9 @@ bool FetchStage::D_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uin
    return false;
 }
 
+/*
+calculates the F_stall_var and D_stall_var or D_bubble_var to see if we should stall or bubble 
+*/
 void FetchStage::calculateControlSignals(PipeReg ** pregs, Stage ** stages) {
    ExecuteStage * es = (ExecuteStage *) stages[ESTAGE];
    DecodeStage * ds = (DecodeStage *) stages[DSTAGE];
@@ -319,6 +339,9 @@ void FetchStage::calculateControlSignals(PipeReg ** pregs, Stage ** stages) {
    D_bubble_var = D_bubble(D_icode, M_icode, E_icode, e_Cnd, d_srcA, d_srcB, E_dstM);
 }
 
+/*
+determines if we should bubble the decode register or not
+*/
 bool FetchStage::D_bubble(uint64_t D_icode, uint64_t M_icode, uint64_t E_icode, uint64_t e_Cnd, uint64_t d_srcA, uint64_t d_srcB, uint64_t E_dstM) {
    return (E_icode == IJXX && !e_Cnd) ||
    (!((E_icode == IMRMOVQ || E_icode == IPOPQ) && (E_dstM == d_srcA || E_dstM == d_srcB)) &&

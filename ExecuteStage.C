@@ -29,12 +29,10 @@
  */
 bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
-    //F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
     E * ereg = (E *) pregs[EREG];
     W * wreg = (W *) pregs[WREG];
 
-    //uint64_t f_pc = freg->getpredPC()->getOutput();
     uint64_t stat = ereg->getstat()->getOutput();
     uint64_t icode = ereg->geticode()->getOutput();
     uint64_t valA = ereg->getvalA()->getOutput();
@@ -71,22 +69,19 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 
     e_Cnd = cond(icode, ifun);
     dstE = e_dstE(icode, dstE, e_Cnd);
-
-    //freg->getpredPC()->setInput(f_pc);
     ExecuteStage::setMInput(mreg, stat, icode, e_Cnd, valA, valE, dstE, dstM);
 
     M_bubble = calculateControlSignals(m_stat, W_stat);
 
-    //printf("%X%X\n", icode, ifun);
-
     return false;
 }
 
+/*
+bubbles the M register
+*/
 void ExecuteStage::bubbleM(PipeReg ** pregs) {
     F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
-    
-    //freg->getpredPC()->normal();
     mreg->getstat()->bubble(SAOK);
     mreg->geticode()->bubble(INOP);
     mreg->getCnd()->bubble();
@@ -96,11 +91,12 @@ void ExecuteStage::bubbleM(PipeReg ** pregs) {
     mreg->getdstM()->bubble(RNONE);
 }
 
+/*
+normalizes the M register
+*/
 void ExecuteStage::normalM(PipeReg ** pregs) {
     F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
-    
-    //freg->getpredPC()->normal();
     mreg->getstat()->normal();
     mreg->geticode()->normal();
     mreg->getCnd()->normal();
@@ -110,6 +106,9 @@ void ExecuteStage::normalM(PipeReg ** pregs) {
     mreg->getdstM()->normal();
 }
 
+/*
+getter for execute stage Cnd
+*/
 uint64_t ExecuteStage::gete_Cnd()
 {
     return e_Cnd;
@@ -131,7 +130,9 @@ void ExecuteStage::doClockHigh(PipeReg ** pregs)
     }
 }
 
-
+/*
+sets the Memory stage input
+*/
 void ExecuteStage::setMInput(M * mreg, uint64_t stat, uint64_t icode,
                             uint64_t Cnd, uint64_t valA, uint64_t valE,
                             uint64_t dstE, uint64_t dstM) {
@@ -144,6 +145,9 @@ void ExecuteStage::setMInput(M * mreg, uint64_t stat, uint64_t icode,
     mreg->getdstM()->setInput(dstM);
 }
 
+/*
+calculates the alu A component to be used in the ALU
+*/
 uint64_t ExecuteStage::aluA(uint64_t icode, uint64_t valA, uint64_t valC) {
     if (icode == IRRMOVQ || icode == IOPQ) {
         return valA;
@@ -160,6 +164,9 @@ uint64_t ExecuteStage::aluA(uint64_t icode, uint64_t valA, uint64_t valC) {
     return 0;
 }
 
+/*
+calculates the alu B component to be used in the ALU
+*/
 uint64_t ExecuteStage::aluB(uint64_t icode, uint64_t valB) {
     if (icode == IRMMOVQ || icode == IMRMOVQ || icode == IOPQ || icode == ICALL
         || icode == IPUSHQ || icode == IRET || icode == IPOPQ) {
@@ -171,6 +178,9 @@ uint64_t ExecuteStage::aluB(uint64_t icode, uint64_t valB) {
     return 0;
 }
 
+/*
+tells us if our function is an IOP
+*/
 uint64_t ExecuteStage::alufun(uint64_t icode, uint64_t ifun) {
     if (icode == IOPQ) {
         return ifun;
@@ -178,6 +188,9 @@ uint64_t ExecuteStage::alufun(uint64_t icode, uint64_t ifun) {
     return ADDQ;
 }
 
+/*
+tells us if we should set the condition codes or not
+*/
 bool ExecuteStage::set_cc(uint64_t icode, uint64_t m_stat, uint64_t W_stat) {
     if ((icode == IOPQ) && (m_stat != SADR && m_stat != SINS && m_stat != SHLT)
         && (W_stat != SADR && W_stat != SINS && W_stat != SHLT)) {
@@ -185,7 +198,9 @@ bool ExecuteStage::set_cc(uint64_t icode, uint64_t m_stat, uint64_t W_stat) {
     }
     return false;
 }
-
+/*
+calculates the execute stage dstE
+*/
 uint64_t ExecuteStage::e_dstE(uint64_t icode, uint64_t dstE, uint64_t e_Cnd) {
     if (icode == IRRMOVQ && !e_Cnd) {
         return RNONE;
@@ -193,16 +208,24 @@ uint64_t ExecuteStage::e_dstE(uint64_t icode, uint64_t dstE, uint64_t e_Cnd) {
     return dstE;
 }
 
+/*
+getter for execute stage dstE
+*/
 uint64_t ExecuteStage::gete_dstE()
 {
     return dstE;
 }
 
+/*
+getter for execute stage valE
+*/
 uint64_t ExecuteStage::gete_valE()
 {
     return valE;
 }
-
+/*
+sets condition codes based on input
+*/
 void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2, uint64_t m_stat, uint64_t W_stat) {
     if (set_cc(icode, m_stat, W_stat)) {
         ConditionCodes * codeInstance = ConditionCodes::getInstance();
@@ -236,29 +259,31 @@ void ExecuteStage::CC(uint64_t icode, uint64_t ifun, uint64_t op1, uint64_t op2,
     }
 }
 
+/*
+acts as the archetectures Arithmetic Logic Unit (ALU)
+basically does all the arithmetic operations
+*/
 uint64_t ExecuteStage::ALU(uint64_t icode, uint64_t ifun, uint64_t aluA, uint64_t aluB, uint64_t m_stat, uint64_t W_stat, bool * of) {
     uint64_t alufun1 = alufun(icode, ifun);
     if (alufun1 == ADDQ) {
-        //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
-	*of = Tools::addOverflow(aluA, aluB);
+	    *of = Tools::addOverflow(aluA, aluB);
         return aluA + aluB;
     }
     else if (alufun1 == SUBQ) {
-        //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
-	*of = Tools::subOverflow(aluA, aluB);
+	    *of = Tools::subOverflow(aluA, aluB);
         return aluB - aluA;
     }
     else if (alufun1 == XORQ) {
-        //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluA ^ aluB;
     }
     else {
-        //CC(icode, ifun, aluA, aluB, m_stat, W_stat);
         return aluA & aluB;
     }
-    //return 0;
 }
 
+/*
+will set the value of Cnd if we take a jump or not
+*/
 uint64_t ExecuteStage::cond(uint64_t icode, uint64_t ifun) {
     ConditionCodes * codeInstance = ConditionCodes::getInstance();
     bool error;
@@ -285,6 +310,9 @@ uint64_t ExecuteStage::cond(uint64_t icode, uint64_t ifun) {
     return 0;
 }
 
+/*
+returns true if the stat is valid for the current instruction
+*/
 bool ExecuteStage::calculateControlSignals(uint64_t m_stat, uint64_t W_stat) {
     if ((m_stat == SADR || m_stat == SINS || m_stat == SHLT)
         || (W_stat == SADR || W_stat == SINS || W_stat == SHLT)) {

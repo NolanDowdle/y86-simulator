@@ -9,7 +9,6 @@
 
 #include "Loader.h"
 #include "Memory.h"
-//#include "Tools.h"
 
 //first column in file is assumed to be 0
 #define ADDRBEGIN 2   //starting column of 3 digit hex address 
@@ -113,10 +112,8 @@ bool Loader::checkFile(std::string fileName)
 
 void Loader::loadline(std::string line) {
     if(line[0] == '0') {
-        //has address in column 0
 
         if(line[DATABEGIN] != ' ') {
-            //has data begin in column 7
             
             int32_t addr = Loader::convert(line, ADDRBEGIN, ADDREND);
             std::string temp;
@@ -167,29 +164,21 @@ bool Loader::hasErrors(std::string line) {
         holdAddress -= 1;
         return false;
     }
-    
-    //printf("NO ERRORS\n");
     return true;
 }
 
 bool Loader::hasEmptyLine(std::string line) {
-    //std::string str = line.substr(0, 28);
-    //std::cout << str << str.length() << "\n";
     return (line.substr(0, 28) == "                            ");
 }
 
 bool Loader::hasEmptyData(std::string line) {
-    //std::string str = line.substr(6, 22);
-    //std::cout << str << str.length() << "\n";
     return (line.substr(6, 22) == "                      ");
 }
 
 bool Loader::hasPipe(std::string line) {
     if(line.substr(28, 1) == "|") {
-        //printf("HASPIPE PASSES\n");
         return true;
     }
-    //printf("HASPIPE FAILS\n");
     return false;
 }
 
@@ -197,17 +186,14 @@ bool Loader::correctAddress(std::string line) {
     if(line.substr(0, 2) == "0x") {
             int32_t x = Loader::convert(line, ADDRBEGIN, ADDREND);
             if(x >= 0 && x <= 0x1000 && line.substr(5, 2) == ": ") {
-                //printf("X: %X\n", x);
                 return true;
             }
     }
-    //printf("CORRECTADDRESS FAILS\n");
     return false;
 }
 
 bool Loader::correctData(std::string line) {
     if(Loader::hasEmptyData(line) || (Loader::bytesDivisibleByTwo(line))) {
-        //printf("CORRECT DATA PASSES\n");
         if (!Loader::hasEmptyData(line)) {
             if(line.substr(7, 1) == " " || line.substr(8, 1) == " ") {
                 return false;
@@ -220,7 +206,6 @@ bool Loader::correctData(std::string line) {
                 temp = i;
                 str = line.substr(i, 1);
                 if(!Loader::validCharacter(str)) {
-                    //std::cout << str << str.length() << "\n";
                     
                     return false;
                 }
@@ -239,16 +224,12 @@ bool Loader::correctData(std::string line) {
         }
         return true;
     }
-    //printf("CORRECT DATA FAILS\n");
     return false;
 }
 
 bool Loader::correctNext(std::string line) {
     int32_t address = Loader::convert(line, ADDRBEGIN, ADDREND);
     int bytes = Loader::getByteNumbers(line);
-    
-    //printf("%X\n", (holdAddress + holdBytes));
-    //printf("%X\n", address);
 
     if (holdAddress + holdBytes == address || holdAddress + holdBytes == 0) {
         holdAddress = address;
@@ -274,8 +255,6 @@ bool Loader::validCharacter(std::string str) {
     {
         return true;
     } 
-    //std::cout << str << "\n";
-    //printf("VALID CHARACTER FAILS\n");
     return false;
 }
 
@@ -285,10 +264,8 @@ bool Loader::bytesDivisibleByTwo(std::string line) {
         bytes = bytes + 1;
     }
     if(bytes % 2 == 0) {
-        //printf("BYTES: %d\n", bytes);
         return true;
     }
-    //printf("BYTES FAILS\n");
     return false;
 }
 
@@ -309,28 +286,7 @@ bool Loader::noOverflow(std::string line) {
     bytes = bytes / 2;
     int sum = address + bytes;
     if (sum >= 0 && sum <= 0x1000) {
-        //printf("NO OVERFLOW PASSES\n");
         return true; 
     }
-    //printf("NO OVERFLOW FAILS\n");  
     return false; 
 }
-/*
-int main() {
-    std::string fuckingwork = "0x138:                      |       .align 8";
-    bool ok = hasErrors(fuckingwork);
-    if (ok == false) {
-        if (correctAddress(fuckingwork) == true) {
-            if (correctData(fuckingwork) == true) {
-                //(fill the rest in for other methods)
-            } else {
-                //(fill the rest in for other methods)
-                printf("Maybe correctData");
-            }
-        } else {
-            printf("Maybe correctAddress?");
-        }
-    } else {
-        printf("Maybe hasErrors");
-    }
-}*/
