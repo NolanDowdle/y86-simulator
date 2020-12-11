@@ -62,7 +62,6 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
  */
 void DecodeStage::doClockHigh(PipeReg ** pregs)
 {
-    F * freg = (F *) pregs[FREG];
     if (E_bubble_var) {
         bubbleE(pregs);
     }

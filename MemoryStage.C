@@ -64,7 +64,6 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
  */
 void MemoryStage::doClockHigh(PipeReg ** pregs)
 {
-    F * freg = (F *) pregs[FREG];
     W * wreg = (W *) pregs[WREG];
     wreg->getstat()->normal();
     wreg->geticode()->normal();

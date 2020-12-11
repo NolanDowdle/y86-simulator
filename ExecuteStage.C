@@ -80,7 +80,6 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 bubbles the M register
 */
 void ExecuteStage::bubbleM(PipeReg ** pregs) {
-    F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
     mreg->getstat()->bubble(SAOK);
     mreg->geticode()->bubble(INOP);
@@ -95,7 +94,6 @@ void ExecuteStage::bubbleM(PipeReg ** pregs) {
 normalizes the M register
 */
 void ExecuteStage::normalM(PipeReg ** pregs) {
-    F * freg = (F *) pregs[FREG];
     M * mreg = (M *) pregs[MREG];
     mreg->getstat()->normal();
     mreg->geticode()->normal();
